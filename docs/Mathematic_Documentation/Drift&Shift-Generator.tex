@@ -1,0 +1,220 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Anfang Header
+\documentclass[12pt,a4paper,oneside,ngerman]{article}
+
+\usepackage[utf8x]{inputenc} % german umlaute possible.
+
+\usepackage{textcomp}
+\usepackage{lmodern}
+
+\usepackage{rotating}
+\usepackage{placeins}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{graphicx}% http://ctan.org/pkg/graphicx
+\usepackage{amsmath}% http://ctan.org/pkg/amsmath
+% Einbindung von Grafik wird möglich. Bei Umweg über dvi geht nur PS und EPS. Verwendet man direkt pdflatex
+% geht auch JPEG, PNG und PDF (für Vektorgrafik)
+\usepackage{graphicx}
+\usepackage{subfigure}
+
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{caption}%[font=footnotesize]{caption}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{nameref}
+
+
+
+%\usepackage{epstopdf}  % automatic conversion of eps to pdf when using pdflatex.
+\usepackage{booktabs,tabularx}	% nice tables
+\usepackage[table,xcdraw]{xcolor}
+
+\usepackage[colorlinks=false, pdfborder={0 0 0}]{hyperref}
+\usepackage{color}
+\usepackage{url}
+\usepackage{url}
+\usepackage{epsfig}
+\usepackage{placeins} % float barriers, etc.
+\usepackage{longtable} % tables over multiple pages
+\usepackage{marginnote} % margin notes
+
+\usepackage[square, comma, authoryear, sort&compress]{natbib}
+\usepackage[english]{babel} 
+
+\renewcommand{\topfraction}{1}
+\renewcommand{\bottomfraction}{1}
+\renewcommand{\textfraction}{0} 
+
+\newcommand{\Concept}{K}
+
+
+
+
+
+\title{\Huge\bfseries Documentation and mathematical workings of the Data-\& Shift- generator}
+\author{\huge\textbf{Benedikt Stratmann}}
+
+\date{\vspace{0cm}\today}
+
+\theoremstyle{plain}
+
+
+
+%some definitions regarding the notation of the thesis.
+\newcommand{\norm}[1]{\left\|#1\right\|}
+\newcommand{\neigh}[1]{\mathcal{N}_{#1}}
+\newcommand{\transpose}[1]{#1^{\mathrm{T}}}
+
+%% more intutive macros for set operations
+\newcommand{\intersect}[0]{\cap}
+\newcommand{\union}[0]{\cup}
+\newcommand{\difference}[0]{-}
+
+%% some number spaces
+\newcommand{\R}{\mathbb{R}} %% real numbers
+\newcommand{\N}{\mathbb{N}} %% natural numbers
+\newcommand{\Z}{\mathbb{Z}} %% integers
+
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}} %% partial derivative
+
+%% gamma function, and digamma(Psi)
+\renewcommand{\digamma}[1]{\Psi\left(#1\right)}
+\newcommand{\tgamma}[1]{\Gamma\left(#1\right)}
+
+%% some notation for proababilities
+\newcommand{\prob}[1][P]{#1}
+\newcommand{\probof}[2][P]{\prob[#1]\left(#2\right)}
+\newcommand{\expectation}[2]{\mathbf{E}_{#1}\left[#2\right]}
+\newcommand{\entropy}[2]{\mathbf{H}_{#1}\left[#2\right]}
+\newcommand{\relentropy}[2]{\mathbf{D}\left(#1||#2\right)}
+
+%% some notation for vectors, matricies and sets
+\newcommand{\veca}[1]{\vec{#1}}		%% vector with an arrow above
+\renewcommand{\vec}[1]{\boldsymbol{#1}}	%% vectors are bold
+\newcommand{\mat}[1]{\mathbf{#1}}  	%% matricies are also bold
+\newcommand{\set}[1]{\mathcal{#1}} 	%% sets are denoted by calligraphic letters
+
+\newcommand{\argmax}[1]{\mathrm{arg}\, \max_{#1}}
+\newcommand{\argmin}[1]{\mathrm{arg}\, \min_{#1}}
+
+% commands
+\newcommand{\linearspan}[1]{\langle{#1}\rangle}
+\newcommand{\myqed}{\hfill $\Box$}
+
+
+
+
+\begin{document}
+	
+	% globale silbentrennung, wo die silbentrennung von latex versagt.
+	
+
+	\pagestyle{plain}
+	
+	\maketitle
+
+	
+	\pagestyle{headings}
+	\section{Goal of the Generator}
+	Under given or not given constraints on input value ranges, input behaviour and output behaviour, synthetic data sets are to be generated. In their current state, these data sets represent regression problems of varying complexity. These data sets should also be able to integrate data drifts, i.e., time-dependent changes in the input data, as well as concept shifts, i.e., time-dependent changes in the mapping function.\\
+	In the following, the generated input features are denoted by $I\in \mathbb{R}^{N\times F}$.
+	$N$ denotes the number of input data points over the considered time interval $T$.
+	$F$ denotes the dimensionality of the input features.
+	Accordingly, the concept is a mapping of the form $\Concept : \mathbb{R}^{N\times F}\rightarrow \mathbb{R}^{N\times O}$.\
+	$O$ denotes the dimensionality of the output, also called labels.
+
+	
+	\section{Concept function}
+	In order to generate a concept shift, i.e. a change of the concept function $K$, the concept function must be parametrized.
+	\begin{align*}
+		K_\Theta (i \in I) = \sum_{k=0}^{M}\Theta_k *\psi(i)
+	\end{align*}
+	$\psi(\cdot)$ is a possible, randomly chosen and initialized regression model. $\Theta_k$ denotes the influence of the $k$-th regression model on the concept $\Concept$.\\ 
+	By linearly combining different models, a variety of different concepts can be generated.
+	Currently $M$ different regression models are chosen. The following regression algorithms are considered:
+	\begin{itemize}
+		\item MLPRegressor
+		\item KernelRidgeRegressor, with a kernel, chosen from the following list:
+			\begin{itemize}
+				\item polynomial
+				\item rbf
+				\item laplacian
+				\item sigmoid,
+				\item cosine
+			\end{itemize}
+		\item TreeRegressor
+	\end{itemize}
+	These regression models are then each trained on 20 uniformly random data points so that each regression model ends up describing a different mapping from input features to labels.
+	
+	\section{Concept shift}
+	\label{sec:Conceptshift}
+	To change the concept function at a previously defined point, we change the influence weights $\Theta_k$. We assume at this point that both time and type of the shift as well as the target of the shift are known.
+	If a label is requested from the concept for a time and an input feature, there are two possibilities.
+	Possibility one: we are not in a drift, the function $K_\Theta$ is evaluated and returned.
+	Possibility two: we are in a shift, which means depending on the \textbf{characteristic (time, type, duration $D$, $\Theta_{Target}$)} of the shift the function evaluation is different:
+	\begin{itemize}
+		\item sudden-Shift:\\
+			As soon as we reach the time location of the shift, a new parametrization of the linear combination applies, the evaluation is done with $K_{\Theta_{Target}}(\cdot)$
+		\item gradual-Shift:\\
+			For the \textbf{duration} of the shift, a transition from $K_{\Theta}(\cdot)$ to $K_{\Theta_{Target}}(\cdot)$ is performed. In this case, one of the two functions is randomly selected for evaluation. The probability of the selection behaves linear. At the beginning of the shift, $K_{\Theta}(\cdot)$ is selected with 100\%, in the centre the selection is made with a chance of 50\%/50\% and at the end of the \textbf{duration} $K_{\Theta_{Target}}(\cdot)$ is used with a probability 100\%.
+		\item incremental-Shift:\\
+			A transition from $K_{\Theta}(\cdot)$ to $K_{\Theta_{Target}}(\cdot)$ takes place over the \textbf{duration} of the shift. Unlike gradual shift, however, interpolation is performed between $\Theta$ and $\Theta_{target}$. $\Theta_{t} = \frac{D-t}{D}\Theta+\frac{t}{D}\Theta_{target}$ for $0\leq t \leq D$ . So the evaluation is always done with $K_{\Theta_{t}}(\cdot)$
+		\item reoccurring concept-Shifts:\\
+			This type of shift is an extension of the previously mentioned types.
+			Instead of just shifting to a new mapping $K_{\Theta_{Target}}(\cdot)$, this type of shift deals with first shifting to $K_{\Theta_{Target}}(\cdot)$ and then shifting back to $K_{\Theta}(\cdot)$.\
+			For sudden shifts this means that at the beginning of the duration until the end of the duration $K_{\Theta_{Target}}(\cdot)$ is used and otherwise $K_{\Theta}(\cdot)$.\\
+			For gradual shifts, at the centre of the drift duration $K_{\Theta_{Target}}(\cdot)$ is used with a 100\% probability for the evaluation and at the beginning and end of the duration $K_{\Theta}(\cdot)$ is used with a 100\% probability.\
+			For incremental shifts we split the shift into two incremental shifts. In the first half of the duration from $\Theta$ to $\Theta_{Target}$ and in the second half from $\Theta_{Target}$ to $\Theta$.
+	\end{itemize}
+	\section{Data generation} 
+	Given the Concept function and the Concept shift, the generation of the input data $I$ will be described in the following.\\
+	The generator is able to generate uniform, constant, gaussian and periodic features, via a sampling process, where a function maps a feature specific input vector $w$ and a timestamp $t$ to a value or probability distribution and returns the value or a sample drawn from that distribution.\\
+	$\vec{w}$ can be viewed as the parametrization of the sampling process. As an example the code of the uniform sampling method is given in algorithm \ref{alg:uniform}.\\
+	
+	\begin{algorithm}[h!]
+		\caption{dist\_uniform($w$,$t$)}\label{alg:uniform}
+		\begin{algorithmic}
+			\State $interval \gets random(0,1) \cdot w[1]$ \Comment{w[1] is used as the interval}
+			\State $return \gets interval-w[1]/2 + w[0]$ \Comment{w[0] is used as the centre}
+		\end{algorithmic}
+	\end{algorithm}
+	
+	Other distributions are constructed similarly and may use more or less entries of $w$ and use the additional time information provided by $t$. As we want to later introduce Datadrifts, the sampling process has to be parametrized. As different distributions or functions have different characteristic markers this parametrization is dealt with by using $w$.\\
+	Similar function characteristics are assigned to the same index of $w$.\\
+	\begin{figure}
+		\centering
+		\includegraphics[width=\textwidth]{Assets/example_distributions.png}
+		\captionsetup{justification=centering}
+		\caption{Examples to each of the different distributions, where the x-axis denotes the time and the y-axis denotes the values of the features.\\
+		feat\_0 sampled from a gaussian distribution\\
+		feat\_1 sampled from a periodic distribution\\
+		feat\_2 sampled from a constant distribution\\
+		feat\_3 sampled from a uniform distribution}
+	\end{figure}
+	
+	After the basic features are generated, dependent and correlated features are generated or built out of the already present features.\\
+	Dependent features are built by again training two models for regression on random data, therefore building more or less random mappings. Then two already existing features are chosen as input for the models and the output is summed with weights determined by $w$.\\
+	
+	Correlation relies on generating a random positive definite correlation matrix and recomputing the features that are to be correlated with each other. A possible solution for generating such a matrix can be seen in \cite{Correlation_generation}.
+	
+	\section{Data drift}
+	The realization of Data drifts is handled similarly to section \ref{sec:Conceptshift}. Instead of changing the weights of the linear combination , the $w$ vector that defines the behaviour of the distributions is changed, depending on the class of drift.\\
+	Therefore, if a feature is marked to drift at a certain point with a certain duration, the $w$ vector of that feature will be changed just as $\Theta$ was changed for the concept drifts.
+	
+	\section{Noise}
+	Noise can be added to the features and outputs of the generator. The Noise is however added after the generation. The noise can therefore be interpreted as sensor readout variance.\\
+	Given the generated value $x$ and a random variable $z \sim \mathcal{N}(0,\sigma_{noise})$ the new noisy value $y$ is:
+	\begin{align*}
+		y = x \cdot (z + 1)
+	\end{align*} 
+	
+	
+	
+	
+\bibliographystyle{apalike} %geralpha k\FCrzt die Autorennamen bei mehreren Autoren nicht einheitlich ab.
+\bibliography{references}
+\end{document}

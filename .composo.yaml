@@ -1,0 +1,27 @@
+app:
+  name:
+    class: driftgenerator
+    package: sid2re
+    project: SiD2ReGenerator
+  type:
+    standalone: true
+    tool: true
+author:
+  email: benedikt.stratmann@iosb.fraunhofer.de
+  name: B. Stratmann
+cache_dir: C:\Users\ben97726\AppData\Local\composo\composo\Cache
+ci:
+  gitlab:
+    autoversion: true
+    cml: true
+    mypy: true
+    pages: true
+    publish: true
+    pytest: true
+conf_dir: C:\Users\ben97726\AppData\Local\composo\composo
+license: mit
+plugin: pydvc
+plugins:
+  dvc: true
+  pipesai: true
+

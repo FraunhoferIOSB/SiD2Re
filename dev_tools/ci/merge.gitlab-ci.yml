@@ -1,0 +1,103 @@
+.poetry-setup: &poetry-setup
+    - curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.6.1 POETRY_HOME=/opt/poetry python3 -
+    - export PATH="/opt/poetry/bin:$PATH"
+    - poetry config http-basic.autolern-pypi $CI_REPO_TOKEN_NAME $CI_REPO_TOKEN_VALUE
+    - poetry --version
+    - poetry run python -V  # Print out python version for debugging
+    - poetry config --local virtualenvs.in-project true
+
+pages:
+  stage: documentation
+  before_script:
+    - apt-get update
+    - apt-get -y install pandoc git
+    - git config --global user.email $GITLAB_CI_USER_EMAIL
+    - git config --global user.name $GITLAB_CI_USER_NAME
+    - *poetry-setup
+    - git pull origin $CI_DEFAULT_BRANCH --rebase
+    - poetry install --with docs
+  script:
+    - cd docs
+    - poetry run sphinx-apidoc -o ./source ../src/sid2re
+    - poetry run make html
+    - mv build/html/ ../public/
+  cache:
+    paths:
+      - .venv
+  artifacts:
+    paths:
+      - public
+
+bump_version:
+  stage: release
+  cache:
+    paths:
+      - .venv
+  before_script:
+    # - apk --no-cache add linux-headers g++
+    # - apk --no-cache add git curl gcc musl-dev python3-dev libffi-dev openssl-dev cargo jq
+    - apt-get update
+    - apt-get -y install git jq
+    - git config --global user.email $GITLAB_CI_USER_EMAIL
+    - git config --global user.name $GITLAB_CI_USER_NAME
+    - *poetry-setup
+    - poetry install --with ci
+  script:
+    - 'echo "curl -s --header \"PRIVATE-TOKEN: $CI_PRIVATE_TOKEN\" \"$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/commits/$CI_COMMIT_SHA\" | jq -r \".parent_ids | .[-1]\""'
+    - |
+      MR_BRANCH_LAST_COMMIT_SHA=$(
+      curl -s \
+      --header "PRIVATE-TOKEN: $CI_PRIVATE_TOKEN" \
+      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/commits/$CI_COMMIT_SHA" |\
+      jq -r '.parent_ids | .[-1]'
+      )
+    - 'echo "curl -s --header \"PRIVATE-TOKEN: $CI_PRIVATE_TOKEN\" \"$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/commits/$MR_BRANCH_LAST_COMMIT_SHA/merge_requests\" | jq -r \".[0].source_branch\""'
+    - |
+      MR_BRANCH_NAME=$(
+      curl -s \
+      --header "PRIVATE-TOKEN: $CI_PRIVATE_TOKEN" \
+      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/commits/$MR_BRANCH_LAST_COMMIT_SHA/merge_requests" |\
+      jq -r '.[0].source_branch'
+      )
+    - BUMP_PART=$(poetry run python dev_tools/ci/versioning.py retrieve-part --branch-name=$MR_BRANCH_NAME)
+    - echo "poetry version $BUMP_PART"
+    - poetry version $BUMP_PART
+    - git add pyproject.toml
+    - 'echo "git commit -m ci: bump version to $(poetry version)"'
+    - 'git commit -m "ci: bump version to $(poetry version)"'
+    - 'echo "git push origin HEAD:refs/heads/$CI_COMMIT_BRANCH"'
+    - 'git push "https://ci_user:${CI_PRIVATE_TOKEN}@${CI_REPOSITORY_URL#*@}" HEAD:refs/heads/$CI_COMMIT_BRANCH'
+    - APP_VERSION="v$(echo $(poetry version) | cut -d ' ' -f 2)"
+    - git tag -f $APP_VERSION
+    # - git push "https://${GITLAB_USER_LOGIN}:${CI_GIT_TOKEN}@${CI_REPOSITORY_URL#*@}" $APP_VERSION
+    - git push "https://ci_user:${CI_PRIVATE_TOKEN}@${CI_REPOSITORY_URL#*@}" $APP_VERSION
+    # - python gitlab_ci_scripts/auto_versioneer.py --action=protect --project_id=$CI_PROJECT_ID --token=$GITLAB_TOKEN
+  rules:
+    - if: $CI_COMMIT_TAG && $CI_COMMIT_TAG != "stable" # The job shall not run if a tag is pushed to the repository which is not a "stable" tag.
+      when: never
+    - when: always
+
+
+publish:
+  cache:
+    paths:
+      - .venv
+  stage: publish
+  before_script:
+    # - apk --no-cache add linux-headers g++
+    # - apk --no-cache add git curl gcc musl-dev python3-dev libffi-dev openssl-dev cargo
+    - apt-get update
+    - apt-get -y install git
+    - git config --global user.email $GITLAB_CI_USER_EMAIL
+    - git config --global user.name $GITLAB_CI_USER_NAME
+    - *poetry-setup
+    - git pull origin $CI_DEFAULT_BRANCH --rebase
+    - poetry config --local repositories.sid2re-pypi "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi"
+    - poetry config http-basic.sid2re-pypi gitlab-ci-token "${CI_JOB_TOKEN}"
+    - poetry install --with ci
+  script:
+    - poetry build
+    - poetry publish --repository sid2re-pypi --skip-existing
+  needs: ["bump_version"]
+
+
