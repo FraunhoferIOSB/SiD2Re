@@ -1,0 +1,303 @@
+[tool.poetry]
+name = "SiD2ReGenerator"
+version = "0.2.8"
+description = "The SiD2ReGenerator Python project"
+license = "BSD-3-Clause"
+authors = ["B. Stratmann <benedikt.stratmann@iosb.fraunhofer.de>"]
+maintainers = ["B. Stratmann <benedikt.stratmann@iosb.fraunhofer.de>"]
+readme = "README.md"
+# The project homepage, e.g. Gitlab pages
+# homepage = ""
+repository = "https://github.com/FraunhoferIOSB/SiD2Re"
+# The project documentation, e.g. Gitlab pages
+# documentation = ""
+keywords = ["tool", "ml"]
+classifiers = [# Optional
+    # How mature is this project? Common values are
+    #   3 - Alpha
+    #   4 - Beta
+    #   5 - Production/Stable
+    # 'Development Status :: 3 - Alpha',
+
+    # Indicate who your project is intended for
+    # 'Intended Audience :: Developers',
+    # 'Topic :: Software Development :: Build Tools',
+
+    # Pick your license as you wish
+    'License :: OSI Approved :: BSD-3-Clause',
+    # Specify the Python versions you support here. In particular, ensure
+    # that you indicate you support Python 3. These classifiers are *not*
+    # checked by 'pip install'. See instead 'python_requires' below.
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    "Programming Language :: Python :: 3.10",
+    'Programming Language :: Python :: 3 :: Only',
+]
+packages = [
+    { include = "sid2re", from = "src" },
+    { include = "tests", format = "sdist" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+scikit-learn = "^1.2.1"
+pandas = "^1.5.3"
+matplotlib = "^3.6.3"
+numpy = "^1.24.1"
+seaborn = "^0.12.2"
+networkx = "^3.1"
+tqdm = "^4.66.1"
+
+
+
+[tool.poetry.group.test]
+optional = true
+[tool.poetry.group.test.dependencies]
+pytest = "*"
+pytest-cov = "*"
+pytest-xdist = "*"
+pytest-profiling = "*"
+check-manifest = "*"
+coverage = "*"
+tox = "*"
+
+[tool.poetry.group.lint]
+optional = true
+[tool.poetry.group.lint.dependencies]
+mypy = "*"
+flake8 = "*"
+flake8-pyproject = "*"
+flake8-builtins = "*"
+wemake-python-styleguide = "*"
+flake8-mutable = "*"
+flake8-print = "*"
+pydoclint = "*"
+pylint = "*"
+# stubs extensions for imported packages to support mypy checking
+pandas-stubs = "*"
+types-PyYAML = "*"
+types-protobuf = "*"
+types-pytz = "*"
+types-python-dateutil = "*"
+types-appdirs = "*"
+types-tqdm = "^4.66.0.2"
+types-setuptools = "^68.2.0.1"
+networkx-stubs = "^0.0.1"
+
+[tool.poetry.group.dev]
+optional = true
+[tool.poetry.group.dev.dependencies]
+jupyterlab = ">=3"
+jupyter = "^1.0.0"
+
+[tool.poetry.group.ci]
+optional = true
+[tool.poetry.group.ci.dependencies]
+fire = "^0.5.0"
+
+[tool.poetry.group.docs]
+optional = true
+[tool.poetry.group.docs.dependencies]
+Sphinx = "^4.4.0"
+sphinx-rtd-theme = "^1.0.0"
+nbsphinx = "^0.8.8"
+sphinx-gallery = "^0.10.1"
+tomli = "^2.0.1"
+numpydoc = "*"
+
+[tool.poetry.group.examples]
+optional = true
+[tool.poetry.group.examples.dependencies]
+ipympl = "^0.9.3"
+torch = ">=1.13.1"
+nbqa = { extras = ["toolchain"], version = "^1.7.0" }
+nbmake = "*"
+
+[tool.poetry.scripts]
+SiD2ReGenerator = "sid2re.main:main"
+
+
+[tool.poetry.urls]
+"Bug Tracker" = "issue/url"
+
+
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = [
+    "-ra",
+    "--maxfail=2",
+    "--code-highlight=yes",
+    "--color=yes"
+]
+testpaths = [
+    "tests"
+]
+pythonpath = [
+    "src"
+]
+
+
+# MYPY
+# Global options:
+
+[tool.mypy]
+python_version = 3.8
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+plugins = "numpy.typing.mypy_plugin"
+
+
+[[tool.mypy.overrides]]
+module = "sklearn"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "sklearn.*"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "numpy"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "matplotlib"
+ignore_missing_imports = true
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "matplotlib.*"
+ignore_missing_imports = true
+warn_return_any = false
+
+# Per-module options:
+
+[tool.flake8]
+exclude = [".tox", "*.egg", "build", "data", "tests"]
+max-line-length = 120
+max-doc-length = 120
+ignore = ["E731", "W503", "WPS412", "WPS410", "I00", "WPS211", "WPS305", "WPS237", "WPS214", "WPS221", "RST", "WPS317",
+    "WPS114", "WPS425", "WPS226", "WPS430", "WPS202", "WPS212", "D105", "WPS336", "WPS232", "WPS110","T201"]
+doctests = true
+docstring-convention = "numpy"
+count = true
+style = "numpy"
+skip-checking-short-docstrings = false
+allow-init-docstring = true
+per-file-ignores = ["docs/source/notebooks/*: WPS111,WPS221,WPS432,WPS430,WPS226", "*base*: WPS420"]
+max-local-variables = 8
+# Restrict the number of public instance variables. Expose variables through properties.
+max-attributes = 1
+max-annotation-complexity = 4
+
+[tool.pylint]
+max-line-length = 120
+disable = ["similarities", "too-many-arguments", "imports", "too-many-instance-attributes", "logging-fstring-interpolation",
+    "logging-not-lazy", "missing-function-docstring", "too-few-public-methods", "missing-module-docstring",
+    "too-many-locals", "too-many-branches", "too-many-statements"]
+
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py{38,39,310,311},unit-types, unit-values ,lint, type, notebooks, lint-notebooks
+
+# Define the minimal tox version required to run;
+# if the host tox is less than this the tool with create an environment and
+# provision it with a tox that satisfies it under provision_tox_env.
+# At least this version is needed for PEP 517/518 support.
+minversion = 3.3.0
+
+# Activate isolated build environment. tox will use a virtual environment
+# to build a source distribution from the source tree. For build tools and
+# arguments use the pyproject.toml file as specified in PEP-517 and PEP-518.
+isolated_build = true
+
+[testenv]
+passenv =
+    DBUS_SESSION_BUS_ADDRESS
+skip_install = true
+allowlist_externals = poetry
+commands_pre =
+    poetry install --with test
+commands =
+    poetry run pytest tests/integration --cov=src --cov-report=term-missing --cov-report=xml --import-mode importlib -n auto --profile --cov-fail-under=5 #increase fail percentage
+    poetry run python dev_tools/tox_scripts/profiling.py
+
+[testenv:unit-types]
+passenv =
+    DBUS_SESSION_BUS_ADDRESS
+skip_install = true
+allowlist_externals = poetry
+commands_pre =
+    poetry install --with test
+commands =
+    poetry run pytest tests/unit/types --cov=src --cov-report=term-missing --cov-report=xml --import-mode importlib -n auto --cov-fail-under=5 #increase fail percentage
+
+[testenv:unit-values]
+passenv =
+    DBUS_SESSION_BUS_ADDRESS
+skip_install = true
+allowlist_externals = poetry
+commands_pre =
+    poetry install --with test
+commands =
+    poetry run pytest tests/unit/values --cov=src --cov-report=term-missing --cov-report=xml --import-mode importlib -n auto --cov-fail-under=5 #increase fail percentage
+
+
+[testenv:type]
+passenv =
+    DBUS_SESSION_BUS_ADDRESS
+skip_install = true
+allowlist_externals = poetry
+commands_pre =
+    poetry install --with lint
+commands =
+    poetry run mypy src
+
+
+[testenv:lint]
+skip_install = true
+allowlist_externals = poetry
+commands_pre =
+    poetry install --only lint
+commands =
+    poetry run pylint -j 4 src
+    poetry run flake8 src
+    poetry run flake8 tests
+
+
+[testenv:lint-notebooks]
+skip_install = true
+allowlist_externals =
+    poetry
+commands_pre =
+    poetry install --with lint,examples
+commands = poetry run python dev_tools/tox_scripts/run-notebook-lint.py
+
+[testenv:notebooks]
+skip_install = true
+allowlist_externals =
+    poetry
+commands_pre =
+    poetry install --with dev,examples,test
+commands = poetry run pytest -n 5 --nbmake  docs --overwrite
+"""
+
+[tool.black]
+skip-string-normalization = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

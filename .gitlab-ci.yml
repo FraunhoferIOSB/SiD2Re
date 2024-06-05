@@ -1,0 +1,111 @@
+variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+    PYPI_SERVER: $PYPI_SERVER # address of the local PyPi Server
+
+    GITLAB_CI_USER_EMAIL: $GITLAB_CI_USER_EMAIL # mail address of the GitLab CI user
+    GITLAB_CI_USER_NAME: $GITLAB_CI_USER_NAME # name of the GitLab CI user
+    CI_GITLAB_ADDRESS: $CI_GITLAB_ADDRESS # name of the GitLab CI user
+    CI_RUNNER_TAG_COMMON: $CI_RUNNER_TAG_COMMON
+    CI_REPO_TOKEN_NAME: $CI_REPO_TOKEN_NAME
+    CI_REPO_TOKEN_VALUE: $CI_REPO_TOKEN_VALUE
+
+    CI_PRIVATE_TOKEN: $CI_ACCESS_TOKEN
+
+# Pip's cache doesn't store the python packages
+# https://pip.pypa.io/en/stable/reference/pip_install/#caching
+
+# If you want to also cache the installed packages, you have to install
+# them in a virtualenv and cache it as well.
+cache:
+  paths:
+    - .cache/pip
+
+default:
+  tags:
+    - $CI_RUNNER_TAG_COMMON
+  image: python:3.8
+
+stages:
+    - test
+    - release
+    - publish
+    - documentation
+
+.poetry-setup: &poetry-setup
+    - curl -sSL https://install.python-poetry.org | POETRY_VERSION=1.6.1 POETRY_HOME=/opt/poetry python3 -
+    - export PATH="/opt/poetry/bin:$PATH"
+    - poetry config http-basic.autolern-pypi $CI_REPO_TOKEN_NAME $CI_REPO_TOKEN_VALUE
+    - poetry --version
+    - poetry run python -V  # Print out python version for debugging
+    - poetry config --local virtualenvs.in-project true
+
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG && $CI_COMMIT_TAG != "stable" # The job shall not run if a tag is pushed to the repository which is not a "stable" tag.
+      when: never
+    - if: '$CI_COMMIT_TITLE =~ /^ci: bump version/'
+      when: never
+    - when: always
+
+pytest:
+    stage: test
+    coverage: '/TOTAL.*\s+(\d+%)$/'
+    before_script:
+        - *poetry-setup
+        - poetry install --with test
+    script:
+        - poetry run tox -e py38,py39,py310,py11,unit-types,unit-values
+    cache:
+      paths:
+        - .venv
+        - .tox
+    artifacts:
+      reports:
+        coverage_report:
+          coverage_format: cobertura
+          path: coverage.xml
+
+mypy:
+    stage: test
+    before_script:
+        - *poetry-setup
+        - poetry install --with test
+    script:
+        - poetry run tox -e type,lint
+    cache:
+      paths:
+        - .venv
+        - .tox
+
+examples:
+    stage: test
+    before_script:
+        - *poetry-setup
+        - poetry install --with dev,examples,test,lint
+    script:
+        - poetry run tox -e notebooks,lint-notebooks
+    cache:
+      paths:
+        - .venv
+        - .tox
+
+include:
+    - local: dev_tools/ci/push.gitlab-ci.yml
+      rules:
+        - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+    - local: dev_tools/ci/merge.gitlab-ci.yml
+      rules:
+        - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+
+
+
+
+
+
+
+    
+
+
+
