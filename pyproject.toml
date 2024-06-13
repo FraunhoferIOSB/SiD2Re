@@ -35,7 +35,19 @@ classifiers = [# Optional
     'Programming Language :: Python :: 3.9',
     "Programming Language :: Python :: 3.10",
     'Programming Language :: Python :: 3 :: Only',
+    "Operating System :: OS Independent",
 ]
+
+
+packages = [
+    { include = "sid2re", from = "src" },
+    { include = "tests", format = "sdist" },
+]
+[project.urls]
+Homepage = "https://github.com/FraunhoferIOSB/SiD2Re"
+Issues = "https://github.com/FraunhoferIOSB/SiD2Re/issues"
+Paper = "https://ieeexplore.ieee.org/document/10218255"
+
 packages = [
     { include = "sid2re", from = "src" },
     { include = "tests", format = "sdist" },
