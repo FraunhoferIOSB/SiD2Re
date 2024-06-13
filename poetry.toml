@@ -1,2 +1,5 @@
 [repositories.sid2re-pypi]
 url = "https://gitlab.cc-asp.fraunhofer.de/api/v4/projects/41183/packages/pypi"
+
+[repositories.test-pypi]
+url = "https://test.pypi.org/legacy/"

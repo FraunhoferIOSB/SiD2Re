@@ -7,40 +7,45 @@ authors = ["B. Stratmann <benedikt.stratmann@iosb.fraunhofer.de>"]
 maintainers = ["B. Stratmann <benedikt.stratmann@iosb.fraunhofer.de>"]
 readme = "README.md"
 # The project homepage, e.g. Gitlab pages
-# homepage = ""
+homepage = "https://github.com/FraunhoferIOSB/SiD2Re"
 # The project documentation, e.g. Gitlab pages
 # documentation = ""
 keywords = ["tool", "ml"]
-classifiers = [  # Optional
-        # How mature is this project? Common values are
-        #   3 - Alpha
-        #   4 - Beta
-        #   5 - Production/Stable
-        # 'Development Status :: 3 - Alpha',
+classifiers = [# Optional
+    # How mature is this project? Common values are
+    #   3 - Alpha
+    #   4 - Beta
+    #   5 - Production/Stable
+    # 'Development Status :: 3 - Alpha',
 
-        # Indicate who your project is intended for
-        # 'Intended Audience :: Developers',
-        # 'Topic :: Software Development :: Build Tools',
+    # Indicate who your project is intended for
+    # 'Intended Audience :: Developers',
+    # 'Topic :: Software Development :: Build Tools',
 
-        # Pick your license as you wish
-        'License :: OSI Approved :: MIT License',
+    # Pick your license as you wish
+    'License :: OSI Approved :: MIT License',
+    # Specify the Python versions you support here. In particular, ensure
+    # that you indicate you support Python 3. These classifiers are *not*
+    # checked by 'pip install'. See instead 'python_requires' below.
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    "Programming Language :: Python :: 3.10",
+    'Programming Language :: Python :: 3 :: Only',
+    "Operating System :: OS Independent",
+]
 
-        # Specify the Python versions you support here. In particular, ensure
-        # that you indicate you support Python 3. These classifiers are *not*
-        # checked by 'pip install'. See instead 'python_requires' below.
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        "Programming Language :: Python :: 3.10",
-        'Programming Language :: Python :: 3 :: Only',
-    ]
+
 packages = [
     { include = "sid2re", from = "src" },
     { include = "tests", format = "sdist" },
 ]
-
+[project.urls]
+Homepage = "https://github.com/FraunhoferIOSB/SiD2Re"
+Issues = "https://github.com/FraunhoferIOSB/SiD2Re/issues"
+Paper = "https://ieeexplore.ieee.org/document/10218255"
 [tool.poetry.dependencies]
 python = "^3.8"
 scikit-learn = "^1.2.1"
@@ -97,11 +102,6 @@ sphinx-gallery = "0.10.1"
 SiD2ReGenerator = "sid2re.main:main"
 
 
-
-
-
-[tool.poetry.urls]
-"Bug Tracker" = "issue/url"
 
 [[tool.poetry.source]]
 name = "autolern-pypi"
@@ -271,6 +271,6 @@ commands =
 
 [tool.flake8]
 exclude = [".tox", "*.egg", "build", "data"]
-select = ["E","W","F"]
+select = ["E", "W", "F"]
 max-line-length = 120
-ignore = ["E731","W503"]
+ignore = ["E731", "W503"]
