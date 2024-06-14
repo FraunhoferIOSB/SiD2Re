@@ -131,12 +131,6 @@ nbmake = "*"
 [tool.poetry.scripts]
 SiD2ReGenerator = "sid2re.main:main"
 
-
-[tool.poetry.urls]
-"Bug Tracker" = "issue/url"
-
-
-
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = [
