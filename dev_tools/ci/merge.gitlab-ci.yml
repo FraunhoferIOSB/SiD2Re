@@ -91,6 +91,7 @@ publish:
     - git config --global user.email $GITLAB_CI_USER_EMAIL
     - git config --global user.name $GITLAB_CI_USER_NAME
     - *poetry-setup
+    - git status
     - git pull origin $CI_DEFAULT_BRANCH --rebase
     - poetry config --local repositories.sid2re-pypi "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi"
     - poetry config http-basic.sid2re-pypi gitlab-ci-token "${CI_JOB_TOKEN}"
