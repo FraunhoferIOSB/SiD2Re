@@ -95,10 +95,13 @@ publish:
     - git pull origin $CI_DEFAULT_BRANCH --rebase
     - poetry config --local repositories.sid2re-pypi "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi"
     - poetry config http-basic.sid2re-pypi gitlab-ci-token "${CI_JOB_TOKEN}"
+    - poetry config repositories.pypi https://pypi.org/
+    - poetry config pypi-token.pypi "${PYPI_TOKEN}"
     - poetry install --with ci
   script:
     - poetry build
     - poetry publish --repository sid2re-pypi --skip-existing
+    - poetry publish --skip-existing
   needs: ["bump_version"]
 
 

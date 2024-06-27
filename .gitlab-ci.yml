@@ -10,7 +10,7 @@ variables:
     CI_REPO_TOKEN_VALUE: $CI_REPO_TOKEN_VALUE
 
     CI_PRIVATE_TOKEN: $CI_ACCESS_TOKEN
-
+    PYPI_TOKEN: $PYPI_TOKEN
 # Pip's cache doesn't store the python packages
 # https://pip.pypa.io/en/stable/reference/pip_install/#caching
 
