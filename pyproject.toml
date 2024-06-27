@@ -29,8 +29,6 @@ classifiers = [# Optional
     # that you indicate you support Python 3. These classifiers are *not*
     # checked by 'pip install'. See instead 'python_requires' below.
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.6',
-    'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     "Programming Language :: Python :: 3.10",
@@ -54,7 +52,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8,<3.12"
 scikit-learn = "^1.2.1"
 pandas = "^1.5.3"
 matplotlib = "^3.6.3"
