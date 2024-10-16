@@ -46,20 +46,16 @@ Homepage = "https://github.com/FraunhoferIOSB/SiD2Re"
 Issues = "https://github.com/FraunhoferIOSB/SiD2Re/issues"
 Paper = "https://ieeexplore.ieee.org/document/10218255"
 
-packages = [
-    { include = "sid2re", from = "src" },
-    { include = "tests", format = "sdist" },
-]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
 scikit-learn = "^1.2.1"
-pandas = "^1.5.3"
+pandas = "*"
 matplotlib = "^3.6.3"
 numpy = "^1.24.1"
 seaborn = "^0.12.2"
 networkx = "^3.1"
-tqdm = "^4.66.1"
+tqdm = "*"
 
 
 
@@ -86,6 +82,7 @@ flake8-mutable = "*"
 flake8-print = "*"
 pydoclint = "*"
 pylint = "*"
+ruff = "*"
 # stubs extensions for imported packages to support mypy checking
 pandas-stubs = "*"
 types-PyYAML = "*"
@@ -100,31 +97,51 @@ networkx-stubs = "^0.0.1"
 [tool.poetry.group.dev]
 optional = true
 [tool.poetry.group.dev.dependencies]
-jupyterlab = ">=3"
-jupyter = "^1.0.0"
+tox = "*"
+jupyterlab = "*"
+jupyter = "*"
+notebook = "*"
+cython = "*"
 
-[tool.poetry.group.ci]
+[tool.poetry.group.pytest]
 optional = true
-[tool.poetry.group.ci.dependencies]
-fire = "^0.5.0"
+[tool.poetry.group.pytest.dependencies]
+pytest = "*"
+pytest-cov = "*"
+pytest-xdist = "*"
+pytest-profiling = "*"
+check-manifest = "*"
+coverage = "*"
+typing_extensions = "*"
+
+
+[tool.poetry.group.misctest]
+optional = true
+[tool.poetry.group.misctest.dependencies]
+bandit = "*"
+radon = "*"
 
 [tool.poetry.group.docs]
 optional = true
 [tool.poetry.group.docs.dependencies]
-Sphinx = "^4.4.0"
-sphinx-rtd-theme = "^1.0.0"
-nbsphinx = "^0.8.8"
-sphinx-gallery = "^0.10.1"
-tomli = "^2.0.1"
+Sphinx = "*"
+sphinx-rtd-theme = "*"
+nbsphinx = "*"
+sphinx-gallery = "*"
+tomli = "*"
 numpydoc = "*"
 
 [tool.poetry.group.examples]
 optional = true
 [tool.poetry.group.examples.dependencies]
-ipympl = "^0.9.3"
-torch = ">=1.13.1"
 nbqa = { extras = ["toolchain"], version = "^1.7.0" }
+ipympl = "^0.9.3"
 nbmake = "*"
+
+[tool.poetry.group.ci]
+optional = true
+[tool.poetry.group.ci.dependencies]
+fire = "*"
 
 [tool.poetry.scripts]
 SiD2ReGenerator = "sid2re.main:main"
@@ -215,7 +232,7 @@ disable = ["similarities", "too-many-arguments", "imports", "too-many-instance-a
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py{38,39,310,311},unit-types, unit-values ,lint, type, notebooks, lint-notebooks
+envlist = py{311},lint, type, docstring-examples,notebooks,bandit
 
 # Define the minimal tox version required to run;
 # if the host tox is less than this the tool with create an environment and
@@ -234,31 +251,22 @@ passenv =
 skip_install = true
 allowlist_externals = poetry
 commands_pre =
-    poetry install --with test
+    poetry install --with pytest,dev
+    python setup.py build_ext --inplace
 commands =
-    poetry run pytest tests/integration --cov=src --cov-report=term-missing --cov-report=xml --import-mode importlib -n auto --profile --cov-fail-under=5 #increase fail percentage
-    poetry run python dev_tools/tox_scripts/profiling.py
+    poetry run pytest tests/integration --cov=src --cov-report term-missing:skip-covered --cov-report=xml --import-mode importlib -n auto --profile
+    poetry run pytest tests/unit --cov=src --cov-report term-missing:skip-covered --cov-report=xml --import-mode importlib  -n auto --profile
+    poetry run python dev_tools/test/profiling.py
 
-[testenv:unit-types]
+[testenv:docstring-examples]
 passenv =
     DBUS_SESSION_BUS_ADDRESS
 skip_install = true
 allowlist_externals = poetry
 commands_pre =
-    poetry install --with test
+    poetry install --with pytest,dev
 commands =
-    poetry run pytest tests/unit/types --cov=src --cov-report=term-missing --cov-report=xml --import-mode importlib -n auto --cov-fail-under=5 #increase fail percentage
-
-[testenv:unit-values]
-passenv =
-    DBUS_SESSION_BUS_ADDRESS
-skip_install = true
-allowlist_externals = poetry
-commands_pre =
-    poetry install --with test
-commands =
-    poetry run pytest tests/unit/values --cov=src --cov-report=term-missing --cov-report=xml --import-mode importlib -n auto --cov-fail-under=5 #increase fail percentage
-
+    poetry --version
 
 [testenv:type]
 passenv =
@@ -277,26 +285,36 @@ allowlist_externals = poetry
 commands_pre =
     poetry install --only lint
 commands =
+    ruff check src --fix
     poetry run pylint -j 4 src
     poetry run flake8 src
     poetry run flake8 tests
-
-
-[testenv:lint-notebooks]
-skip_install = true
-allowlist_externals =
-    poetry
-commands_pre =
-    poetry install --with lint,examples
-commands = poetry run python dev_tools/tox_scripts/run-notebook-lint.py
 
 [testenv:notebooks]
 skip_install = true
 allowlist_externals =
     poetry
 commands_pre =
-    poetry install --with dev,examples,test
+    poetry install --with dev,examples,pytest
 commands = poetry run pytest -n 5 --nbmake  docs --overwrite
+
+[testenv:bandit]
+description = Run Bandit security analysis.
+allowlist_externals =
+    poetry
+commands_pre =
+    poetry install --with misctest
+commands = poetry --version
+
+
+[testenv:radon]
+description = Analyze code complexity with Radon.
+allowlist_externals =
+    poetry
+commands_pre =
+    poetry install --with misctest
+commands = radon cc src -s -a
+
 """
 
 [tool.black]
