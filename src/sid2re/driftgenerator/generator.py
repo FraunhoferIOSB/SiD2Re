@@ -72,10 +72,10 @@ def set_concept_drifts(
         random.seed(rand_seed)
         np.random.seed(rand_seed)
     concept_shift_info = []
-    drift_spacing = (time_stamp[-1] - time_stamp[0]) / concept_drifts if concept_drifts > 0 else None
     if concept_shift_stamps.size > 0:
         for _ in range(concept_shift_stamps.shape[0]):
             if drift_blocking_mode:
+                drift_spacing = (time_stamp[-1] - time_stamp[0]) / concept_drifts
                 concept_shift_info.append(
                     [
                         random.random() / 2 * drift_spacing,
