@@ -1,18 +1,18 @@
 variables:
-    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-    PYPI_SERVER: $PYPI_SERVER # address of the local PyPi Server
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PYPI_SERVER: $PYPI_SERVER # address of the local PyPi Server
 
-    GITLAB_CI_USER_EMAIL: $GITLAB_CI_USER_EMAIL # mail address of the GitLab CI user
-    GITLAB_CI_USER_NAME: $GITLAB_CI_USER_NAME # name of the GitLab CI user
+  GITLAB_CI_USER_EMAIL: $GITLAB_CI_USER_EMAIL # mail address of the GitLab CI user
+  GITLAB_CI_USER_NAME: $GITLAB_CI_USER_NAME # name of the GitLab CI user
 
-    CI_GITLAB_ADDRESS: $CI_GITLAB_ADDRESS # name of the GitLab CI user
-    CI_RUNNER_TAG_COMMON: 'icps'
-    CI_REPO_TOKEN_NAME: $CI_REPO_TOKEN_NAME
-    CI_REPO_TOKEN_VALUE: $CI_REPO_TOKEN_VALUE
-    CI_PRIVATE_TOKEN: $CI_REPO_ACCESS_TOKEN
-    POETRY_VERSION: 1.8.3
-    PYTHON_VERSION: 38
-    CODE_SRC_DIR: src
+  CI_GITLAB_ADDRESS: $CI_GITLAB_ADDRESS # name of the GitLab CI user
+  CI_RUNNER_TAG_COMMON: 'icps'
+  CI_REPO_TOKEN_NAME: $CI_REPO_TOKEN_NAME
+  CI_REPO_TOKEN_VALUE: $CI_REPO_TOKEN_VALUE
+  CI_PRIVATE_TOKEN: $CI_ACCESS_TOKEN
+  POETRY_VERSION: 1.8.3
+  PYTHON_VERSION: 38
+  CODE_SRC_DIR: src
 
 # DEFAULT RUNNER CONFIGURATIONS
 default:
@@ -33,12 +33,12 @@ include:
       - '/templates/publish.yml'
 
 .poetry-setup: &poetry-setup
-    - curl -sSL https://install.python-poetry.org | POETRY_VERSION=$POETRY_VERSION POETRY_HOME=/opt/poetry python3 -
-    - export PATH="/opt/poetry/bin:$PATH"
-    - poetry config http-basic.autolern-pypi $CI_REPO_TOKEN_NAME $CI_REPO_TOKEN_VALUE
-    - poetry --version
-    - poetry config --local virtualenvs.in-project true
-    - poetry run python -V  # Print out python version for debugging
+  - curl -sSL https://install.python-poetry.org | POETRY_VERSION=$POETRY_VERSION POETRY_HOME=/opt/poetry python3 -
+  - export PATH="/opt/poetry/bin:$PATH"
+  - poetry config http-basic.autolern-pypi $CI_REPO_TOKEN_NAME $CI_REPO_TOKEN_VALUE
+  - poetry --version
+  - poetry config --local virtualenvs.in-project true
+  - poetry run python -V  # Print out python version for debugging
 
 
 publish_pypi:
@@ -63,6 +63,6 @@ publish_pypi:
   script:
     - poetry build
     - poetry publish --repository pypi --skip-existing
-  needs: ["bump_version","install-dependencies"]
+  needs: [ "bump_version","install-dependencies" ]
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
