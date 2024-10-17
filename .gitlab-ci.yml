@@ -62,7 +62,7 @@ publish_pypi:
     - poetry install --with ci
   script:
     - poetry build
-    - poetry publish --repository pypi --skip-existing
+    - poetry publish --skip-existing
   needs: [ "bump_version","install-dependencies" ]
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
