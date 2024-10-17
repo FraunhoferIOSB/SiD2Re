@@ -20,6 +20,14 @@ default:
     - $CI_RUNNER_TAG_COMMON # Set in repository environment variables
   image: python:3.8 # Image to use for the runners should be in line with the main application environment
 
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: '$CI_COMMIT_TITLE =~ /^ci: bump version/'
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "schedule" || $CI_PIPELINE_SOURCE == "web"
+
 include:
   - project: 'iosb/kis/icps/misc/icps-ci-cd'
     ref: main
