@@ -238,7 +238,7 @@ def helper_get_sensor(index: int, input_feat_1, input_feat_2,
         this function can be defined by the user if custom transitions are needed.
     :return: ordered array of generated feature values; shape [len(time_stamps)]
     """
-    sample = []
+    sample: typing.List[float] = []
     w = np.random.rand(10)
     new_shifts = []
     new_info = []
@@ -261,12 +261,12 @@ def helper_get_sensor(index: int, input_feat_1, input_feat_2,
                 coeff_pos = coeff + np.min(coeff)
                 coeff_normalized = coeff_pos / np.max(coeff_pos)
                 input = np.asarray([input_feat_1.pop(0), input_feat_2.pop(0)]).reshape(1, -1)
-                sample.append(
-                    coeff_normalized[0] * model1.predict(input)[0] + coeff_normalized[1] * model2.predict(input)[0])
+                sample.append(float(
+                    coeff_normalized[0] * model1.predict(input)[0] + coeff_normalized[1] * model2.predict(input)[0]))
     else:
         for stamp in time_stamps:
             input = np.asarray([input_feat_1.pop(0), input_feat_2.pop(0)]).reshape(1, -1)
-            sample.append(w[0] * model1.predict(input)[0] + w[1] * model2.predict(input)[0])
+            sample.append(float(w[0] * model1.predict(input)[0] + w[1] * model2.predict(input)[0]))
     return np.array(sample)
 
 

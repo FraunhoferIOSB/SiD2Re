@@ -1,6 +1,9 @@
+[project]
+name = "SiD2ReGenerator"
+
 [tool.poetry]
 name = "SiD2ReGenerator"
-version = "0.1.2a1"
+version = "0.1.2a2"
 description = "The SiD2ReGenerator Python project"
 license = "BSD-3-Clause"
 authors = ["B. Stratmann <benedikt.stratmann@iosb.fraunhofer.de>"]
