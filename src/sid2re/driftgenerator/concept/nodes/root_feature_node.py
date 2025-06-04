@@ -1,15 +1,16 @@
+"""Functionalities surrounding the root nodes that generate data inputs based on basic probability density functions."""
 import numpy as np
 
-from sid2re.driftgenerator.concept.nodes._base_node import _BaseNode
-from sid2re.driftgenerator.concept.nodes.root_distributions import _BaseDistribution, UniformDistribution
+from sid2re.driftgenerator.concept.nodes.base_node import BaseNode
+from sid2re.driftgenerator.concept.nodes.root_distributions import BaseDistribution, UniformDistribution
 
 
-class RootFeatureNode(_BaseNode):
+class RootFeatureNode(BaseNode):
     """Noe representing an independent feature. Also called root feature."""
 
     def __init__(self, minimum: float, maximum: float):
         """
-        Initializes a RootFeatureNode instance.
+        Initialize a RootFeatureNode instance.
 
         Parameters
         ----------
@@ -19,24 +20,24 @@ class RootFeatureNode(_BaseNode):
             The maximum value of the generated feature.
         """
         super().__init__()
-        self.minimum: float = minimum
-        self.maximum: float = maximum
-        self.distribution: _BaseDistribution = UniformDistribution()
+        self._minimum: float = minimum
+        self._maximum: float = maximum
+        self.distribution: BaseDistribution = UniformDistribution()
 
-    def set_distro(self, distribution: _BaseDistribution) -> None:
+    def set_distro(self, distribution: BaseDistribution) -> None:
         """
-        Sets the distribution type.
+        Set the distribution type.
 
         Parameters
         ----------
-        distribution : _BaseDistribution
+        distribution : BaseDistribution
             The distribution type.
         """
         self.distribution = distribution
 
     def generate_data(self, time_stamps: np.ndarray) -> np.ndarray:
         """
-        Generates data based on the configured distribution.
+        Generate data based on the configured distribution.
 
         Parameters
         ----------
@@ -48,8 +49,8 @@ class RootFeatureNode(_BaseNode):
         np.ndarray
             List of generated data.
         """
-
-        return np.array(
-            [self.distribution.generate(self.current_config(time), time, self.minimum, self.maximum) for time in
-             time_stamps]
-        )
+        generated_data = [
+            self.distribution.generate(self.current_config(time), time, self._minimum, self._maximum)
+            for time in time_stamps
+        ]
+        return np.array(generated_data)

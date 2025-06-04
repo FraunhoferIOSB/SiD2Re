@@ -1,8 +1,9 @@
-from sid2re.driftgenerator.concept.drift_transition_functions._base_transition_function import _BaseTransitionFunction
+from sid2re.driftgenerator.concept.drift_transition_functions.base_transition_function import BaseTransitionFunction
 
 
-class LinearTransitionFunction(_BaseTransitionFunction):
+class LinearTransitionFunction(BaseTransitionFunction):
     """Transition function used by incremental drifts. This is a linear transition."""
+
     @classmethod
     def _transition_coefficient(cls, current_time: float, shift_centre: float, shift_radius: float) -> float:
         """Compute the transition coefficient using linear interpolation.

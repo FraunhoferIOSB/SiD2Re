@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from sid2re.driftgenerator.concept.drift_transition_functions import _BaseTransitionFunction
+from sid2re.driftgenerator.concept.drift_transition_functions import BaseTransitionFunction
 from sid2re.driftgenerator.utils.type_aliases import NumberArray
 
 
-class _BaseDriftBehaviour(ABC):
+class BaseDriftBehaviour(ABC):
     """Abstract base class defining the behavior of drift in a system."""
 
     def __init__(
@@ -13,7 +13,7 @@ class _BaseDriftBehaviour(ABC):
         drift_time: float,
         drift_radius: float,
         coefficient_shift: NumberArray,
-        reoccurring: bool
+        reoccurring: bool,
     ) -> None:
         """
         Initialize the drift behavior.
@@ -39,19 +39,24 @@ class _BaseDriftBehaviour(ABC):
             self.to_drift = self.__class__(drift_time - (drift_radius / 2), drift_radius / 2, coefficient_shift, False)
             self.from_drift = self.__class__(
                 drift_time + (drift_radius / 2), drift_radius / 2, -coefficient_shift,
-                False
+                False,
             )
 
     @property
     def drift_information(self) -> List:
-        """Returns information about the drift as a list [Time, Radius, Coefficient,Name]"""
+        """Fetch information about the drift as a list [Time, Radius, Coefficient,Name].
+
+        Returns
+        -------
+        List
+        """
         return [self.drift_time, self.drift_radius, self.coefficient_shift, self._drift_name]
 
     def modify_coeff(
         self,
         coefficient: NumberArray,
-        transition_behaviour: _BaseTransitionFunction,
-        current_time: float
+        transition_behaviour: BaseTransitionFunction,
+        current_time: float,
     ) -> NumberArray:
         """
         Modify the coefficients based on the drift behavior.
@@ -60,7 +65,7 @@ class _BaseDriftBehaviour(ABC):
         ----------
         coefficient : NumberArray
             The coefficients to be modified.
-        transition_behaviour : _BaseTransitionFunction
+        transition_behaviour : BaseTransitionFunction
             The behavior of transition.
         current_time : float
             The current time in the system.
@@ -86,23 +91,23 @@ class _BaseDriftBehaviour(ABC):
     def _compute_coeff_delta(  # noqa: DOC101,DOC109,DOC103,DOC201,DOC203
         self,
         coefficient: NumberArray,
-        transition_behaviour: _BaseTransitionFunction,
-        current_time: float
+        transition_behaviour: BaseTransitionFunction,
+        current_time: float,
     ) -> NumberArray:
         """
         Abstract method to compute the change in coefficients during drift.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         coefficient : NumberArray
             The coefficients to be updated.
-        transition_behaviour : _BaseTransitionFunction
+        transition_behaviour : BaseTransitionFunction
             The transition behavior.
         current_time : float
             The current time in the simulation.
 
-        Returns:
-        --------
+        Returns
+        -------
         NumberArray
             The updated coefficients.
         """
@@ -113,8 +118,8 @@ class _BaseDriftBehaviour(ABC):
         """
         Abstract property representing the name of the drift behavior.
 
-        Returns:
-        --------
+        Returns
+        -------
         str
             The name of the drift behavior.
         """

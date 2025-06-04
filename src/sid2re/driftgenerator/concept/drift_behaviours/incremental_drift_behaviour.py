@@ -1,9 +1,9 @@
-from sid2re.driftgenerator.concept.drift_behaviours._base_drift_behaviour import _BaseDriftBehaviour
-from sid2re.driftgenerator.concept.drift_transition_functions import _BaseTransitionFunction
+from sid2re.driftgenerator.concept.drift_behaviours.base_drift_behaviour import BaseDriftBehaviour
+from sid2re.driftgenerator.concept.drift_transition_functions import BaseTransitionFunction
 from sid2re.driftgenerator.utils.type_aliases import NumberArray
 
 
-class IncrementalDriftBehaviour(_BaseDriftBehaviour):
+class IncrementalDriftBehaviour(BaseDriftBehaviour):
     """Specify the transformation of the concept coefficients caused by an incremental drift.
 
     An incremental drift represents a continuous transfer from one concept to another. The coefficients are therefore
@@ -13,8 +13,8 @@ class IncrementalDriftBehaviour(_BaseDriftBehaviour):
     def _compute_coeff_delta(
         self,
         coefficient: NumberArray,
-        transition_behaviour: _BaseTransitionFunction,
-        current_time: float
+        transition_behaviour: BaseTransitionFunction,
+        current_time: float,
     ) -> NumberArray:
         """
         Compute the change in coefficients during incremental drift.
@@ -23,7 +23,7 @@ class IncrementalDriftBehaviour(_BaseDriftBehaviour):
         ----------
         coefficient : NumberArray
             The coefficients to be modified.
-        transition_behaviour : _BaseTransitionFunction
+        transition_behaviour : BaseTransitionFunction
             The behavior of transition.
         current_time : float
             The current time in the system.
@@ -33,11 +33,10 @@ class IncrementalDriftBehaviour(_BaseDriftBehaviour):
         NumberArray
             The computed change in coefficients.
         """
-        coefficient_delta = transition_behaviour.transition_coefficient(
+        return transition_behaviour.transition_coefficient(
             current_time, self.drift_time,
-            self.drift_radius
+            self.drift_radius,
         ) * self.coefficient_shift
-        return coefficient_delta
 
     @property
     def _drift_name(self) -> str:
@@ -47,6 +46,6 @@ class IncrementalDriftBehaviour(_BaseDriftBehaviour):
         Returns
         -------
         str
-            The name of the drift behavior: "incremental".
+            The name of the drift behavior: 'incremental'.
         """
-        return "incremental"
+        return 'incremental'

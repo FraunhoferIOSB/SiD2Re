@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from sid2re.driftgenerator.utils.type_aliases import NumberArray
 
 
-class _BaseDistribution(ABC):
+class BaseDistribution(ABC):
     """Abstract base class defining the distribution behavior."""
 
     @classmethod
@@ -27,14 +27,12 @@ class _BaseDistribution(ABC):
             The generated value.
         """
         if not w.any():
-            return 0.0
-        output = cls._generate(w, timestamp, minimum, maximum)
-        assert isinstance(output, float)
-        return output
+            return float(0)
+        return cls._generate(w, timestamp, minimum, maximum)
 
     @classmethod
     @abstractmethod
-    def _generate(cls, w: NumberArray, timestamp: float, minimum: float, maximum: float) -> float:  # noqa:WPS123
+    def _generate(cls, w: NumberArray, timestamp: float, minimum: float, maximum: float) -> float:  # noqa:WPS123,WPS111
         """Abstract method to generate a value based on the distribution behavior.
 
         Parameters

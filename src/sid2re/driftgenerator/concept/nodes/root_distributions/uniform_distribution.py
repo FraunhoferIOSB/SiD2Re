@@ -1,17 +1,23 @@
 import random
 
-from sid2re.driftgenerator.concept.nodes.root_distributions._base_distribution import _BaseDistribution
+from sid2re.driftgenerator.concept.nodes.root_distributions.base_distribution import BaseDistribution
 from sid2re.driftgenerator.utils.type_aliases import NumberArray
 
 
-class UniformDistribution(_BaseDistribution):
+class UniformDistribution(BaseDistribution):
     """Value generating distribution used in root features.
 
     This distribution randomly generates values based on a uniform distribution.
     """
 
     @classmethod
-    def _generate(cls, w: NumberArray, timestamp: float, minimum: float, maximum: float) -> float:  # noqa:  WPS123
+    def _generate(  # noqa: WPS123,W0613,
+        cls,
+        w: NumberArray,  # noqa: WPS111
+        timestamp: float,
+        minimum: float,
+        maximum: float,
+    ) -> float:
         """Generate a value based on a uniform distribution.
 
         Parameters

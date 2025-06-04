@@ -1,4 +1,8 @@
-# Import external functionalities
+# pylint: disable=too-many-positional-arguments
+"""Entrypoint for the fundamental generator capabilities.
+
+Provides the basic construction procedure for node dependencies and handles data generation.
+"""
 import random
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -6,14 +10,17 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 
-from sid2re.driftgenerator.concept.drift_behaviours import _BaseDriftBehaviour, FaultySensorDriftBehaviour, \
-    GradualDriftBehaviour, IncrementalDriftBehaviour, SuddenDriftBehaviour
-from sid2re.driftgenerator.concept.drift_transition_functions import _BaseTransitionFunction, LinearTransitionFunction
+from sid2re.driftgenerator.concept.drift_behaviours import (
+    BaseDriftBehaviour, FaultySensorDriftBehaviour,
+    GradualDriftBehaviour, IncrementalDriftBehaviour, SuddenDriftBehaviour,
+)
+from sid2re.driftgenerator.concept.drift_transition_functions import BaseTransitionFunction, LinearTransitionFunction
 from sid2re.driftgenerator.concept.graph_concept import ConceptGraph, ConceptReader
 # Import internal functionalities
-from sid2re.driftgenerator.concept.nodes.root_distributions import _BaseDistribution, ConstantDistribution, \
-    GaussianDistribution, \
-    PeriodicalDistribution, UniformDistribution
+from sid2re.driftgenerator.concept.nodes.root_distributions import (
+    BaseDistribution, ConstantDistribution,
+    GaussianDistribution, PeriodicalDistribution, UniformDistribution,
+)
 from sid2re.driftgenerator.utils.type_aliases import NumberArray
 
 
@@ -22,14 +29,14 @@ def _distro_declarator(
     n_uniform_feat: int,
     n_gauss_feat: int,
     n_constant_feat: int,
-    n_periodical_feat: int
-) -> Dict[int, _BaseDistribution]:
+    n_periodical_feat: int,
+) -> Dict[int, BaseDistribution]:
     if n_uniform_feat + n_gauss_feat + n_constant_feat + n_periodical_feat > n_features:
         n_set_feat = n_uniform_feat + n_gauss_feat + n_constant_feat + n_periodical_feat
         raise ValueError(
-            f"Too many root features set staticaly: {n_set_feat} of {n_features}"
+            f'Too many root features set staticaly: {n_set_feat} of {n_features}',
         )
-    declarator: Dict[int, _BaseDistribution] = {}
+    declarator: Dict[int, BaseDistribution] = {}
     indices = np.arange(0, n_features)
     np.random.shuffle(indices)
     list_of_indices = list(indices)
@@ -44,15 +51,15 @@ def _distro_declarator(
     for _ in range(n_periodical_feat):
         declarator[list_of_indices.pop()] = PeriodicalDistribution()
 
-    for _ in range(len(list_of_indices)):
+    for _ in list_of_indices:
         declarator[list_of_indices.pop()] = random.choice(
-            (UniformDistribution(), GaussianDistribution(), ConstantDistribution(), PeriodicalDistribution())
+            (UniformDistribution(), GaussianDistribution(), ConstantDistribution(), PeriodicalDistribution()),
         )
 
     return declarator
 
 
-def set_concept_drifts(
+def _set_concept_drifts(
     rand_seed: float,
     drift_blocking_mode: bool,
     concept_drifts: int,
@@ -60,7 +67,7 @@ def set_concept_drifts(
     min_severity: float,
     max_severity: float,
     number_of_models: int,
-    concept_drift_class: Optional[_BaseDriftBehaviour]
+    concept_drift_class: Optional[BaseDriftBehaviour],
 ) -> List:
     drifts = []
     if drift_blocking_mode and concept_drifts != 0:
@@ -79,32 +86,36 @@ def set_concept_drifts(
                 concept_shift_info.append(
                     [
                         random.random() / 2 * drift_spacing,
-                        (np.minimum(
-                            max_severity,
-                            np.maximum(min_severity, np.random.rand(number_of_models))
-                        ) - 0.5) * 1000 / number_of_models,
-                        random.choice(
+                        (
+                            (np.minimum(
+                                max_severity,
+                                np.maximum(min_severity, np.random.rand(number_of_models)),
+                            ) - 0.5) * 1000 / number_of_models  # noqa: WPS319
+                        ),
+                        random.choice(  # noqa: S311
                             [
                                 FaultySensorDriftBehaviour, GradualDriftBehaviour,
-                                IncrementalDriftBehaviour, SuddenDriftBehaviour
-                            ]
+                                IncrementalDriftBehaviour, SuddenDriftBehaviour,
+                            ],
                         ),
                         random.choice([True, False]),
-                    ]
+                    ],
                 )
             else:
                 concept_shift_info.append(
                     [
                         random.random() * (np.max(concept_shift_stamps) / 2),
                         (np.random.randint(1) * 2 - 1) * np.minimum(
-                            max_severity, np.maximum(min_severity, np.random.rand(number_of_models))
+                            max_severity, np.maximum(min_severity, np.random.rand(number_of_models)),
                         ) * 1000 / number_of_models,
                         random.choice(
-                            [FaultySensorDriftBehaviour, GradualDriftBehaviour,
-                             IncrementalDriftBehaviour, SuddenDriftBehaviour]
+                            [
+                                FaultySensorDriftBehaviour, GradualDriftBehaviour,
+                                IncrementalDriftBehaviour, SuddenDriftBehaviour,
+                            ],
                         ),
-                        random.choice([True, False])
-                    ]
+                        random.choice([True, False]),
+                    ],
                 )
     for stamp, info in zip(concept_shift_stamps, concept_shift_info):
         if concept_drift_class is not None:
@@ -115,12 +126,12 @@ def set_concept_drifts(
             drift_time=stamp,
             drift_radius=info[0],
             coefficient_shift=info[1],
-            reoccurring=info[3]
+            reoccurring=info[3],
         )]  # type: ignore[operator]
     return drifts
 
 
-def set_data_drifts(
+def _set_data_drifts(
     rand_seed: int,
     drift_blocking_mode: bool,
     data_drifts: int,
@@ -128,9 +139,9 @@ def set_data_drifts(
     feature_idxs: List[str],
     min_severity: float,
     max_severity: float,
-    data_drift_class: Optional[_BaseDriftBehaviour]
-) -> Dict[str, List[_BaseDriftBehaviour]]:
-    drifts: Dict[str, List[_BaseDriftBehaviour]] = {}
+    data_drift_class: Optional[BaseDriftBehaviour],
+) -> Dict[str, List[BaseDriftBehaviour]]:
+    drifts: Dict[str, List[BaseDriftBehaviour]] = {}
     for idx in feature_idxs:
         drifts[idx] = []
     if drift_blocking_mode and data_drifts != 0:
@@ -153,11 +164,11 @@ def set_data_drifts(
                     random.choice(
                         [
                             FaultySensorDriftBehaviour, GradualDriftBehaviour,
-                            IncrementalDriftBehaviour, SuddenDriftBehaviour
-                        ]
+                            IncrementalDriftBehaviour, SuddenDriftBehaviour,
+                        ],
                     ),
-                    random.choice([True, False])
-                ]
+                    random.choice([True, False]),
+                ],
             )
         else:
             data_shift_info.append(
@@ -166,11 +177,13 @@ def set_data_drifts(
                     random.random() * (np.max(data_shifts) / 2),
                     np.minimum(max_severity, np.maximum(min_severity, np.random.rand(10))),
                     random.choice(
-                        [FaultySensorDriftBehaviour, GradualDriftBehaviour,
-                         IncrementalDriftBehaviour, SuddenDriftBehaviour]
+                        [
+                            FaultySensorDriftBehaviour, GradualDriftBehaviour,
+                            IncrementalDriftBehaviour, SuddenDriftBehaviour,
+                        ],
                     ),
-                    random.choice([True, False])
-                ]
+                    random.choice([True, False]),
+                ],
             )
     for stamp, info in zip(data_shifts, data_shift_info):
         if data_drift_class is not None:
@@ -182,7 +195,7 @@ def set_data_drifts(
                 drift_time=stamp,
                 drift_radius=info[1],
                 coefficient_shift=info[2],
-                reoccurring=info[4]
+                reoccurring=info[4],
             )]  # type: ignore[operator]
     return drifts
 
@@ -207,9 +220,9 @@ class DataGeneratorGraph:
         rand_seed: int = -1,
         concept_drifts: int = 0,
         data_drifts: int = 0,
-        concept_drift_class: Optional[_BaseDriftBehaviour] = None,
-        data_drift_class: Optional[_BaseDriftBehaviour] = None,
-        transition_func: Optional[_BaseTransitionFunction] = None,
+        concept_drift_class: Optional[BaseDriftBehaviour] = None,
+        data_drift_class: Optional[BaseDriftBehaviour] = None,
+        transition_func: Optional[BaseTransitionFunction] = None,
         continuous_time: bool = True,
         max_time_sparsity: int = 10,
         drift_blocking_mode: bool = False,
@@ -223,7 +236,7 @@ class DataGeneratorGraph:
         n_target_dep: int = 1,
         root_distros: Optional[List[int]] = None,
         graph: Optional[nx.DiGraph] = None,
-        output_nodes: Optional[List[Any]] = None
+        output_nodes: Optional[List[Any]] = None,
     ) -> None:
         """
         Initialize the DataGenerator, defining the behavior of the non-stationary concept.
@@ -269,17 +282,17 @@ class DataGeneratorGraph:
         data_drifts : int
             Number of data drifts introduced in the generated dataset of `get_data()`.
 
-        concept_drift_class : Optional[_BaseDriftBehaviour]
+        concept_drift_class : Optional[BaseDriftBehaviour]
             The choosen drift behaviour class (like 'sudden', 'gradual', 'incremental', ...) of the generated
             concept drifts.
             If set to None, the type will be decided for each drift at random.
 
-        data_drift_class : Optional[_BaseDriftBehaviour]
+        data_drift_class : Optional[BaseDriftBehaviour]
             The choosen drift behaviour class ('sudden', 'gradual', 'incremental', 'faulty_sensor', ...) of the
             generated data drifts.
             If set to None, the type will be decided for each drift at random.
 
-        transition_func : Optional[_BaseTransitionFunction]
+        transition_func : Optional[BaseTransitionFunction]
             How two concepts are to be blended. Used for incremental and gradual features. Custom transition functions
             may be provided but must implement the API of the following exemplary call:
             `transition_func(current_time_stamp: int, shift_centre: int, shift_radius: float) -> float`.
@@ -366,45 +379,45 @@ class DataGeneratorGraph:
                 temp_time_stamp.append(current_time_stamp)
                 current_time_stamp += random.randint(1, max_time_sparsity)
             time_stamp = np.array(temp_time_stamp)
-        self.continous_time = continuous_time
-        self.number_of_data_points = number_of_data_points
-        self.time_stamp = time_stamp
-        self.transition_func = transition_func
+        self._continous_time = continuous_time
+        self._number_of_data_points = number_of_data_points
+        self._time_stamp = time_stamp
+        self._transition_func = transition_func
         # define concept graph
         if graph is None:
-            self.concept = ConceptGraph(
+            self._concept = ConceptGraph(
                 number_of_features, number_of_outputs, number_of_models,
                 number_of_dependency_models, min_number_dependencies, max_number_dependencies,
-                level_limited, limit_target_dep, n_target_dep, feature_min, feature_max
+                level_limited, limit_target_dep, n_target_dep, feature_min, feature_max,
             )
         else:
-            self.concept = ConceptReader(
+            self._concept = ConceptReader(
                 graph, number_of_models, number_of_dependency_models, feature_min, feature_max,
-                output_nodes
+                output_nodes,
             )
-            number_of_features = self.concept.number_of_features_per_level
+            number_of_features = self._concept.number_of_features_per_level
         declar = _distro_declarator(number_of_features[0], *root_distros)
-        self.concept.define_root_distros(declar)
-        self.concept.define_transition_func(transition_func)
+        self._concept.define_root_distros(declar)
+        self._concept.define_transition_func(transition_func)
         # define drifts
-        self.concept_drifts = set_concept_drifts(
+        self._concept_drifts = _set_concept_drifts(
             rand_seed, drift_blocking_mode,
             concept_drifts, time_stamp,
             min_severity, max_severity,
-            number_of_models, concept_drift_class
+            number_of_models, concept_drift_class,
         )
-        self.data_drifts = set_data_drifts(
+        self._data_drifts = _set_data_drifts(
             rand_seed, drift_blocking_mode, data_drifts,
-            time_stamp, self.concept.feature_idx,
-            min_severity, max_severity, data_drift_class
+            time_stamp, self._concept.feature_idx,
+            min_severity, max_severity, data_drift_class,
         )
-        self.concept.define_drift(self.concept_drifts, self.data_drifts)
-        self.min = feature_min
-        self.max = feature_max
-        self.n_models = number_of_models
-        self.n_features = number_of_features
-        self.n_outputs = number_of_outputs
-        self.noise_var = noise_var
+        self._concept.define_drift(self._concept_drifts, self._data_drifts)
+        self._feature_min = feature_min
+        self._feature_max = feature_max
+        self._n_models = number_of_models
+        self._n_features = number_of_features
+        self._n_outputs = number_of_outputs
+        self._noise_var = noise_var
 
     def get_data(self) -> pd.DataFrame:
         """
@@ -422,38 +435,38 @@ class DataGeneratorGraph:
         features, models, drifts, and other parameters, ensuring that the resulting dataset reflects the
         specified non-stationary behaviors.
         """
-
-        for feature_idx in range(self.n_features.shape[0]):
-            self.concept.generate_level_data(self.time_stamp, feature_idx)
-        self.concept.generate_output(self.time_stamp)
-        data_df = self.concept.pd_data_readout()
+        for feature_idx in range(self._n_features.shape[0]):
+            self._concept.generate_level_data(self._time_stamp, feature_idx)
+        self._concept.generate_output(self._time_stamp)
+        data_df = self._concept.pd_data_readout()
         data_df = data_df.multiply(
             np.concatenate(
                 [
                     np.ones((data_df.shape[0], 1)),
-                    np.random.normal(1, self.noise_var, (data_df.shape[0], data_df.shape[1] - 1))
+                    np.random.normal(1, self._noise_var, (data_df.shape[0], data_df.shape[1] - 1)),
                 ],
-                axis=1
-            )
+                axis=1,
+            ),
         )
-        return data_df
+        return data_df  # noqa: WPS331
 
-    def get_concept(self) -> ConceptGraph:
+    @property
+    def concept(self) -> ConceptGraph:
         """
-        Provides the drift-induced concept function that is used to map the generated inputs to the targets.
+        Provide the drift-induced concept function that is used to map the generated inputs to the targets.
 
         Returns
         -------
         ConceptGraph
             Concept used in the drifted datastream
         """
-        return self.concept
+        return self._concept
 
     def get_concept_adjacency_matrix(
         self, output_node_names: bool = False,
     ) -> Union[np.ndarray, Tuple[np.ndarray, List[Any]]]:
         """
-        Returns the adjacency matrix of the concept graph.
+        Return the adjacency matrix of the concept graph.
 
         Parameters
         ----------
@@ -476,12 +489,15 @@ class DataGeneratorGraph:
         the names of the nodes in the graph, which can be helpful for interpreting the structure of the graph.
         """
         if output_node_names:
-            return np.asarray(nx.adjacency_matrix(self.concept.get_graph()).todense()), self.concept.get_graph().nodes()
-        return np.asarray(nx.adjacency_matrix(self.concept.get_graph()).todense())
+            return np.asarray(
+                nx.adjacency_matrix(self._concept.graph).todense(),
+            ), self._concept.graph.nodes()
+        return np.asarray(nx.adjacency_matrix(self._concept.graph).todense())
 
     def get_shift_information(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
-        Provides two pandas dataframes, that describe the concept and data drifts.
+        Provide two pandas dataframes, that describe the concept and data drifts.
+
         For the concept drifts (time, duration, weight shift, class) is provided.
         For data drifts (time, affected feature, duration, weight shift, class) is provided.
 
@@ -491,17 +507,18 @@ class DataGeneratorGraph:
             Drift Information DataFrames
         """
         concept_info = []
-        for concept_drift in self.concept_drifts:
+        for concept_drift in self._concept_drifts:
             concept_info += [concept_drift.drift_information]
         concept = pd.DataFrame(concept_info, columns=['time_stamp(centre)', 'radius', 'shift', 'class'])
 
         data_info = []
-        for node_idx, entry in self.data_drifts.items():
+        for node_idx, entry in self._data_drifts.items():
             for data_drift in entry:
                 data_info += [[*(data_drift.drift_information), node_idx]]
         features = pd.DataFrame(
             data_info,
-            columns=['time_stamp(centre)', 'radius', 'shift of distribution parameters', 'class',
-                     'affected_feature']
+            columns=[
+                'time_stamp(centre)', 'radius', 'shift of distribution parameters', 'class', 'affected_feature',
+            ],
         )
         return concept, features

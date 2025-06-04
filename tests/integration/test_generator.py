@@ -25,7 +25,7 @@ def test_standard_run():
     data_df = generator.get_data()
     print(data_df)
     concept_shift_information, data_shift_information = generator.get_shift_information()
-    concept = generator.get_concept()
+    concept = generator.concept
     _ = generator.get_concept_adjacency_matrix()
     _ = generator.get_concept_adjacency_matrix(output_node_names=True)
     print(concept_shift_information)
