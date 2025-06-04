@@ -11,14 +11,14 @@ variables:
   CI_REPO_TOKEN_VALUE: $CI_REPO_TOKEN_VALUE
   CI_PRIVATE_TOKEN: $CI_ACCESS_TOKEN
   POETRY_VERSION: 1.8.3
-  PYTHON_VERSION: 38
+  PYTHON_VERSION: 311
   CODE_SRC_DIR: src
 
 # DEFAULT RUNNER CONFIGURATIONS
 default:
   tags:
     - $CI_RUNNER_TAG_COMMON # Set in repository environment variables
-  image: python:3.8 # Image to use for the runners should be in line with the main application environment
+  image: python:3.11 # Image to use for the runners should be in line with the main application environment
 
 workflow:
   rules:

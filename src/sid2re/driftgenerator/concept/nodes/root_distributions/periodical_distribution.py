@@ -2,11 +2,11 @@ import math
 
 import numpy as np
 
-from sid2re.driftgenerator.concept.nodes.root_distributions._base_distribution import _BaseDistribution
+from sid2re.driftgenerator.concept.nodes.root_distributions.base_distribution import BaseDistribution
 from sid2re.driftgenerator.utils.type_aliases import NumberArray
 
 
-class PeriodicalDistribution(_BaseDistribution):
+class PeriodicalDistribution(BaseDistribution):
     """Value generating distribution used in root features.
 
     This distributions generation follows a time dependent cycle.
@@ -39,7 +39,7 @@ class PeriodicalDistribution(_BaseDistribution):
             The generated value.
         """
         selection = math.floor(3 * w[0])
-        generated_value = 0.0
+        generated_value = float(0)
         if selection <= 0:
             generated_value = cls._dist_cos(w[1:], timestamp, minimum, maximum)
         if selection == 1:
@@ -79,7 +79,7 @@ class PeriodicalDistribution(_BaseDistribution):
         amplitude = min(maximum - average, average - minimum) * w[3]
 
         timestamp = (timestamp + shift) * math.pi
-        timestamp = timestamp % interval
+        timestamp = timestamp % interval  # noqa: WPS350
         return float((np.cos(timestamp) * amplitude) + average)
 
     @classmethod
@@ -120,7 +120,13 @@ class PeriodicalDistribution(_BaseDistribution):
         return float(timestamp * sign * amplitude + base)
 
     @classmethod
-    def _dist_quadratic(cls, w: NumberArray, timestamp: float, minimum: float, maximum: float) -> float:  # noqa:WPS123
+    def _dist_quadratic(  # noqa:WPS123
+        cls,
+        w: NumberArray,  # noqa: WPS111
+        timestamp: float,
+        minimum: float,
+        maximum: float,
+    ) -> float:
         """
         Generate a value based on a quadratic function.
 

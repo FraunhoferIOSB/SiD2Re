@@ -6,8 +6,10 @@ Therefore, it is mostly concerned with generating data and the underlying concep
 The main interface of the package is the class: DataGeneratorGraph, therefore the initialization and main methods will be explained here.
 # Benchmarks
 
-For local generation of the SiD2Re benchmarks refer to the functions generate_benchmark_* found under sid2re.benchmarks
+For local generation of the SiD2Re benchmarks refer to the functions generate_benchmark_* found under sid2re.benchmarks.
 
+- benchmark_v1: Initial benchmark associated with the original publication (10.1109/INDIN51400.2023.10218255). Selected number of seeds, that produce interpretable concepts. Limited to low dimensionality datasets.
+- benchmark_v2: Benchmark with reworked graph based generation backend, that focuses on the variation of one particular concept (consistent seed). Suitable for ablation studies. Includes datasets with up to 20 dimensions.
 # Examples
 For visualization the following script is used:
 ```python

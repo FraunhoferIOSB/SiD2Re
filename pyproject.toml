@@ -48,7 +48,7 @@ Paper = "https://ieeexplore.ieee.org/document/10218255"
 
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.12"
+python = ">=3.9,<3.12"
 scikit-learn = "^1.2.1"
 pandas = "*"
 matplotlib = "^3.6.3"
@@ -56,8 +56,7 @@ numpy = "^1.24.1"
 seaborn = "^0.12.2"
 networkx = "^3.1"
 tqdm = "*"
-
-
+pyyaml = "*"
 
 [tool.poetry.group.test]
 optional = true
@@ -90,9 +89,9 @@ types-protobuf = "*"
 types-pytz = "*"
 types-python-dateutil = "*"
 types-appdirs = "*"
-types-tqdm = "^4.66.0.2"
-types-setuptools = "^68.2.0.1"
-networkx-stubs = "^0.0.1"
+types-tqdm = "*"
+types-setuptools = "*"
+networkx-stubs = "*"
 
 [tool.poetry.group.dev]
 optional = true
@@ -166,7 +165,7 @@ pythonpath = [
 # Global options:
 
 [tool.mypy]
-python_version = 3.8
+python_version = 3.11
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -209,7 +208,8 @@ exclude = [".tox", "*.egg", "build", "data", "tests"]
 max-line-length = 120
 max-doc-length = 120
 ignore = ["E731", "W503", "WPS412", "WPS410", "I00", "WPS211", "WPS305", "WPS237", "WPS214", "WPS221", "RST", "WPS317",
-    "WPS114", "WPS425", "WPS226", "WPS430", "WPS202", "WPS212", "D105", "WPS336", "WPS232", "WPS110","T201"]
+    "WPS114", "WPS425", "WPS226", "WPS430", "WPS202", "WPS212", "D105", "WPS336", "WPS232", "WPS110", "T201", "S311",
+    "WPS432", "WPS100","WPS519", "WPS204","D100","D104", "WPS421","WPS210", "WPS230","WPS440","WPS231","WPS213","WPS201"]
 doctests = true
 docstring-convention = "numpy"
 count = true
@@ -226,7 +226,7 @@ max-annotation-complexity = 4
 max-line-length = 120
 disable = ["similarities", "too-many-arguments", "imports", "too-many-instance-attributes", "logging-fstring-interpolation",
     "logging-not-lazy", "missing-function-docstring", "too-few-public-methods", "missing-module-docstring",
-    "too-many-locals", "too-many-branches", "too-many-statements"]
+    "too-many-locals", "too-many-branches", "too-many-statements","unused-argument"]
 
 
 [tool.tox]
@@ -251,7 +251,7 @@ passenv =
 skip_install = true
 allowlist_externals = poetry
 commands_pre =
-    poetry install --with pytest,dev
+    poetry install --with pytest,dev --sync
     python setup.py build_ext --inplace
 commands =
     poetry run pytest tests/integration --cov=src --cov-report term-missing:skip-covered --cov-report=xml --import-mode importlib -n auto --profile
@@ -264,7 +264,7 @@ passenv =
 skip_install = true
 allowlist_externals = poetry
 commands_pre =
-    poetry install --with pytest,dev
+    poetry install --with pytest,dev --sync
 commands =
     poetry --version
 
@@ -274,7 +274,7 @@ passenv =
 skip_install = true
 allowlist_externals = poetry
 commands_pre =
-    poetry install --with lint
+    poetry install --with lint --sync
 commands =
     poetry run mypy src
 
@@ -283,7 +283,7 @@ commands =
 skip_install = true
 allowlist_externals = poetry
 commands_pre =
-    poetry install --only lint
+    poetry install --only lint --sync
 commands =
     ruff check src --fix
     poetry run pylint -j 4 src
@@ -295,7 +295,7 @@ skip_install = true
 allowlist_externals =
     poetry
 commands_pre =
-    poetry install --with dev,examples,pytest
+    poetry install --with dev,examples,pytest --sync
 commands = poetry run pytest -n 5 --nbmake  docs --overwrite
 
 [testenv:bandit]
@@ -303,7 +303,7 @@ description = Run Bandit security analysis.
 allowlist_externals =
     poetry
 commands_pre =
-    poetry install --with misctest
+    poetry install --with misctest --sync
 commands = poetry --version
 
 
@@ -312,7 +312,7 @@ description = Analyze code complexity with Radon.
 allowlist_externals =
     poetry
 commands_pre =
-    poetry install --with misctest
+    poetry install --with misctest --sync
 commands = radon cc src -s -a
 
 """

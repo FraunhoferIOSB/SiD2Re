@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 
 
-class _BaseTransitionFunction(ABC):
+class BaseTransitionFunction(ABC):
+    """Abstract base class for any transition functions in sid2re."""
 
     @classmethod
     def transition_coefficient(cls, current_time: float, shift_centre: float, shift_radius: float) -> float:
@@ -32,9 +33,8 @@ class _BaseTransitionFunction(ABC):
         if current_time > shift_centre + shift_radius:
             return 1
         if shift_radius <= 0:
-            raise ValueError("Shift Radius cannot be negative or zero")
-        coefficient = cls._transition_coefficient(current_time, shift_centre, shift_radius)
-        return coefficient
+            raise ValueError('Shift Radius cannot be negative or zero')
+        return cls._transition_coefficient(current_time, shift_centre, shift_radius)
 
     @classmethod
     @abstractmethod

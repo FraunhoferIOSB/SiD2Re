@@ -1,9 +1,9 @@
-from sid2re.driftgenerator.concept.nodes.root_distributions._base_distribution import _BaseDistribution
+from sid2re.driftgenerator.concept.nodes.root_distributions.base_distribution import BaseDistribution
 
 from sid2re.driftgenerator.utils.type_aliases import NumberArray
 
 
-class ConstantDistribution(_BaseDistribution):
+class ConstantDistribution(BaseDistribution):
     """Value generating distribution used in root features. This distribution only generates one constant value."""
 
     @classmethod
