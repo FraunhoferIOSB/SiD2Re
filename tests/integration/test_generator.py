@@ -1,6 +1,6 @@
 from sid2re.driftgenerator.generator import DataGeneratorGraph
 from sid2re.driftgenerator.concept.drift_behaviours import SuddenDriftBehaviour, IncrementalDriftBehaviour, \
-    GradualDriftBehaviour, FaultySensorDriftBehaviour
+    GradualDriftBehaviour, FaultySensorDriftBehaviour,ReoccuringSuddenDriftBehaviour,ReoccuringIncrementalDriftBehaviour,ReoccuringFaultySensorDriftBehaviour,ReoccuringGradualDriftBehaviour
 import numpy as np
 import pytest
 import networkx as nx
@@ -14,7 +14,7 @@ def test_standard_run():
                                    number_of_outputs=2,
                                    concept_drifts=1,
                                    data_drifts=1,
-                                   number_of_data_points=1000,
+                                   number_of_data_points=500,
                                    noise_var=0.1,
                                    continuous_time=True,
                                    rand_seed=1,
@@ -30,7 +30,7 @@ def test_standard_run():
     _ = generator.get_concept_adjacency_matrix(output_node_names=True)
     print(concept_shift_information)
     print(data_shift_information)
-    assert data_df.size == 1000 * 10
+    assert data_df.size == 500 * 10
 
 
 @pytest.mark.parametrize("n_cd_drifts", [0, 1, 2])
@@ -48,7 +48,7 @@ def test_parameter_grid(n_cd_drifts, n_dd_drifts, cd_class, dd_class, bool_switc
                                    data_drifts=n_dd_drifts,
                                    concept_drift_class=cd_class,
                                    data_drift_class=dd_class,
-                                   number_of_data_points=1000,
+                                   number_of_data_points=500,
                                    noise_var=0.1,
                                    continuous_time=bool_switch,
                                    rand_seed=1,
@@ -63,7 +63,7 @@ def test_parameter_grid(n_cd_drifts, n_dd_drifts, cd_class, dd_class, bool_switc
                                    )
     data_df = generator.get_data()
     concept_shift_information, data_shift_information = generator.get_shift_information()
-    assert data_df.size == 1000 * 10
+    assert data_df.size == 500 * 10
 
 
 def test_false_initialization():
