@@ -1,3 +1,6 @@
+[project]
+name = "sid2regenerator"
+
 [tool.poetry]
 name = "SiD2ReGenerator"
 version = "0.3.0"
@@ -48,7 +51,7 @@ Paper = "https://ieeexplore.ieee.org/document/10218255"
 
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"
+python = ">=3.10,<3.12"
 scikit-learn = "^1.2.1"
 pandas = "*"
 matplotlib = "^3.6.3"
@@ -232,7 +235,7 @@ disable = ["similarities", "too-many-arguments", "imports", "too-many-instance-a
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py{311},lint, type, docstring-examples,notebooks,bandit
+envlist = py{310,311},lint, type, docstring-examples,notebooks,bandit
 
 # Define the minimal tox version required to run;
 # if the host tox is less than this the tool with create an environment and
