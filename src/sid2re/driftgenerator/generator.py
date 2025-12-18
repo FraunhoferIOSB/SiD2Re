@@ -11,15 +11,29 @@ import numpy as np
 import pandas as pd
 
 from sid2re.driftgenerator.concept.drift_behaviours import (
-    BaseDriftBehaviour, FaultySensorDriftBehaviour,
-    GradualDriftBehaviour, IncrementalDriftBehaviour, SuddenDriftBehaviour,
+    BaseDriftBehaviour,
+    FaultySensorDriftBehaviour,
+    GradualDriftBehaviour,
+    IncrementalDriftBehaviour,
+    SuddenDriftBehaviour,
+    ReoccuringGradualDriftBehaviour,
+    ReoccuringFaultySensorDriftBehaviour,
+    ReoccuringIncrementalDriftBehaviour,
+    ReoccuringSuddenDriftBehaviour,
 )
-from sid2re.driftgenerator.concept.drift_transition_functions import BaseTransitionFunction, LinearTransitionFunction
+from sid2re.driftgenerator.concept.drift_transition_functions import (
+    BaseTransitionFunction,
+    LinearTransitionFunction,
+)
 from sid2re.driftgenerator.concept.graph_concept import ConceptGraph, ConceptReader
+
 # Import internal functionalities
 from sid2re.driftgenerator.concept.nodes.root_distributions import (
-    BaseDistribution, ConstantDistribution,
-    GaussianDistribution, PeriodicalDistribution, UniformDistribution,
+    BaseDistribution,
+    ConstantDistribution,
+    GaussianDistribution,
+    PeriodicalDistribution,
+    UniformDistribution,
 )
 from sid2re.driftgenerator.utils.type_aliases import NumberArray
 
@@ -53,7 +67,12 @@ def _distro_declarator(
 
     for _ in list_of_indices:
         declarator[list_of_indices.pop()] = random.choice(
-            (UniformDistribution(), GaussianDistribution(), ConstantDistribution(), PeriodicalDistribution()),
+            (
+                UniformDistribution(),
+                GaussianDistribution(),
+                ConstantDistribution(),
+                PeriodicalDistribution(),
+            ),
         )
 
     return declarator
@@ -72,9 +91,13 @@ def _set_concept_drifts(
     drifts = []
     if drift_blocking_mode and concept_drifts != 0:
         step = (time_stamp[-1] - time_stamp[0]) / concept_drifts
-        concept_shift_stamps = np.array([0.5 * step + step * cd_idx for cd_idx in range(concept_drifts)])
+        concept_shift_stamps = np.array(
+            [0.5 * step + step * cd_idx for cd_idx in range(concept_drifts)],
+        )
     else:
-        concept_shift_stamps = np.random.rand(concept_drifts) * (time_stamp[-1] - time_stamp[0])
+        concept_shift_stamps = np.random.rand(concept_drifts) * (
+            time_stamp[-1] - time_stamp[0]
+        )
     if rand_seed != -1:
         random.seed(rand_seed)
         np.random.seed(rand_seed)
@@ -87,34 +110,55 @@ def _set_concept_drifts(
                     [
                         random.random() / 2 * drift_spacing,
                         (
-                            (np.minimum(
-                                max_severity,
-                                np.maximum(min_severity, np.random.rand(number_of_models)),
-                            ) - 0.5) * 1000 / number_of_models  # noqa: WPS319
+                            (
+                                np.minimum(
+                                    max_severity,
+                                    np.maximum(
+                                        min_severity, np.random.rand(number_of_models),
+                                    ),
+                                )
+                                - 0.5
+                            )
+                            * 1000
+                            / number_of_models  # noqa: WPS319
                         ),
                         random.choice(  # noqa: S311
                             [
-                                FaultySensorDriftBehaviour, GradualDriftBehaviour,
-                                IncrementalDriftBehaviour, SuddenDriftBehaviour,
+                                FaultySensorDriftBehaviour,
+                                GradualDriftBehaviour,
+                                IncrementalDriftBehaviour,
+                                SuddenDriftBehaviour,
+                                ReoccuringFaultySensorDriftBehaviour,
+                                ReoccuringGradualDriftBehaviour,
+                                ReoccuringIncrementalDriftBehaviour,
+                                ReoccuringSuddenDriftBehaviour,
                             ],
                         ),
-                        random.choice([True, False]),
                     ],
                 )
             else:
                 concept_shift_info.append(
                     [
                         random.random() * (np.max(concept_shift_stamps) / 2),
-                        (np.random.randint(1) * 2 - 1) * np.minimum(
-                            max_severity, np.maximum(min_severity, np.random.rand(number_of_models)),
-                        ) * 1000 / number_of_models,
+                        (np.random.randint(1) * 2 - 1)
+                        * np.minimum(
+                            max_severity,
+                            np.maximum(min_severity, np.random.rand(number_of_models)),
+                        )
+                        * 1000
+                        / number_of_models,
                         random.choice(
                             [
-                                FaultySensorDriftBehaviour, GradualDriftBehaviour,
-                                IncrementalDriftBehaviour, SuddenDriftBehaviour,
+                                FaultySensorDriftBehaviour,
+                                GradualDriftBehaviour,
+                                IncrementalDriftBehaviour,
+                                SuddenDriftBehaviour,
+                                ReoccuringFaultySensorDriftBehaviour,
+                                ReoccuringGradualDriftBehaviour,
+                                ReoccuringIncrementalDriftBehaviour,
+                                ReoccuringSuddenDriftBehaviour,
                             ],
                         ),
-                        random.choice([True, False]),
                     ],
                 )
     for stamp, info in zip(concept_shift_stamps, concept_shift_info):
@@ -122,12 +166,13 @@ def _set_concept_drifts(
             cd_class = concept_drift_class
         else:
             cd_class = info[2]
-        drifts += [cd_class(
-            drift_time=stamp,
-            drift_radius=info[0],
-            coefficient_shift=info[1],
-            reoccurring=info[3],
-        )]  # type: ignore[operator]
+        drifts += [
+            cd_class(  # type: ignore[operator]
+                drift_time=stamp,
+                drift_radius=info[0],
+                coefficient_shift=info[1],
+            ),
+        ]
     return drifts
 
 
@@ -146,7 +191,9 @@ def _set_data_drifts(
         drifts[idx] = []
     if drift_blocking_mode and data_drifts != 0:
         step = (time_stamp[-1] - time_stamp[0]) / data_drifts
-        data_shifts = np.array([0.5 * step + step * dd_idx for dd_idx in range(data_drifts)])
+        data_shifts = np.array(
+            [0.5 * step + step * dd_idx for dd_idx in range(data_drifts)],
+        )
     else:
         data_shifts = np.random.rand(data_drifts) * (time_stamp[-1] - time_stamp[0])
     if rand_seed != -1:
@@ -159,15 +206,25 @@ def _set_data_drifts(
             data_shift_info.append(
                 [
                     random.choice(feature_idxs),
-                    random.random() / 2 * (time_stamp[-1] - time_stamp[0]) / data_drifts,
-                    np.minimum(max_severity, np.maximum(min_severity, np.random.rand(10))),
+                    random.random()
+                    / 2
+                    * (time_stamp[-1] - time_stamp[0])
+                    / data_drifts,
+                    np.minimum(
+                        max_severity, np.maximum(min_severity, np.random.rand(10)),
+                    ),
                     random.choice(
                         [
-                            FaultySensorDriftBehaviour, GradualDriftBehaviour,
-                            IncrementalDriftBehaviour, SuddenDriftBehaviour,
+                            FaultySensorDriftBehaviour,
+                            GradualDriftBehaviour,
+                            IncrementalDriftBehaviour,
+                            SuddenDriftBehaviour,
+                            ReoccuringFaultySensorDriftBehaviour,
+                            ReoccuringGradualDriftBehaviour,
+                            ReoccuringIncrementalDriftBehaviour,
+                            ReoccuringSuddenDriftBehaviour,
                         ],
                     ),
-                    random.choice([True, False]),
                 ],
             )
         else:
@@ -175,14 +232,21 @@ def _set_data_drifts(
                 [
                     random.choice(feature_idxs),
                     random.random() * (np.max(data_shifts) / 2),
-                    np.minimum(max_severity, np.maximum(min_severity, np.random.rand(10))),
+                    np.minimum(
+                        max_severity, np.maximum(min_severity, np.random.rand(10)),
+                    ),
                     random.choice(
                         [
-                            FaultySensorDriftBehaviour, GradualDriftBehaviour,
-                            IncrementalDriftBehaviour, SuddenDriftBehaviour,
+                            FaultySensorDriftBehaviour,
+                            GradualDriftBehaviour,
+                            IncrementalDriftBehaviour,
+                            SuddenDriftBehaviour,
+                            ReoccuringFaultySensorDriftBehaviour,
+                            ReoccuringGradualDriftBehaviour,
+                            ReoccuringIncrementalDriftBehaviour,
+                            ReoccuringSuddenDriftBehaviour,
                         ],
                     ),
-                    random.choice([True, False]),
                 ],
             )
     for stamp, info in zip(data_shifts, data_shift_info):
@@ -191,12 +255,12 @@ def _set_data_drifts(
         else:
             dd_class = info[3]
         drifts[info[0]] += [
-            dd_class(
+            dd_class(  # type: ignore[operator]
                 drift_time=stamp,
                 drift_radius=info[1],
                 coefficient_shift=info[2],
-                reoccurring=info[4],
-            )]  # type: ignore[operator]
+            ),
+        ]
     return drifts
 
 
@@ -386,13 +450,25 @@ class DataGeneratorGraph:
         # define concept graph
         if graph is None:
             self._concept = ConceptGraph(
-                number_of_features, number_of_outputs, number_of_models,
-                number_of_dependency_models, min_number_dependencies, max_number_dependencies,
-                level_limited, limit_target_dep, n_target_dep, feature_min, feature_max,
+                number_of_features,
+                number_of_outputs,
+                number_of_models,
+                number_of_dependency_models,
+                min_number_dependencies,
+                max_number_dependencies,
+                level_limited,
+                limit_target_dep,
+                n_target_dep,
+                feature_min,
+                feature_max,
             )
         else:
             self._concept = ConceptReader(
-                graph, number_of_models, number_of_dependency_models, feature_min, feature_max,
+                graph,
+                number_of_models,
+                number_of_dependency_models,
+                feature_min,
+                feature_max,
                 output_nodes,
             )
             number_of_features = self._concept.number_of_features_per_level
@@ -401,15 +477,24 @@ class DataGeneratorGraph:
         self._concept.define_transition_func(transition_func)
         # define drifts
         self._concept_drifts = _set_concept_drifts(
-            rand_seed, drift_blocking_mode,
-            concept_drifts, time_stamp,
-            min_severity, max_severity,
-            number_of_models, concept_drift_class,
+            rand_seed,
+            drift_blocking_mode,
+            concept_drifts,
+            time_stamp,
+            min_severity,
+            max_severity,
+            number_of_models,
+            concept_drift_class,
         )
         self._data_drifts = _set_data_drifts(
-            rand_seed, drift_blocking_mode, data_drifts,
-            time_stamp, self._concept.feature_idx,
-            min_severity, max_severity, data_drift_class,
+            rand_seed,
+            drift_blocking_mode,
+            data_drifts,
+            time_stamp,
+            self._concept.feature_idx,
+            min_severity,
+            max_severity,
+            data_drift_class,
         )
         self._concept.define_drift(self._concept_drifts, self._data_drifts)
         self._feature_min = feature_min
@@ -443,7 +528,9 @@ class DataGeneratorGraph:
             np.concatenate(
                 [
                     np.ones((data_df.shape[0], 1)),
-                    np.random.normal(1, self._noise_var, (data_df.shape[0], data_df.shape[1] - 1)),
+                    np.random.normal(
+                        1, self._noise_var, (data_df.shape[0], data_df.shape[1] - 1),
+                    ),
                 ],
                 axis=1,
             ),
@@ -463,7 +550,8 @@ class DataGeneratorGraph:
         return self._concept
 
     def get_concept_adjacency_matrix(
-        self, output_node_names: bool = False,
+        self,
+        output_node_names: bool = False,
     ) -> Union[np.ndarray, Tuple[np.ndarray, List[Any]]]:
         """
         Return the adjacency matrix of the concept graph.
@@ -489,9 +577,12 @@ class DataGeneratorGraph:
         the names of the nodes in the graph, which can be helpful for interpreting the structure of the graph.
         """
         if output_node_names:
-            return np.asarray(
-                nx.adjacency_matrix(self._concept.graph).todense(),
-            ), self._concept.graph.nodes()
+            return (
+                np.asarray(
+                    nx.adjacency_matrix(self._concept.graph).todense(),
+                ),
+                self._concept.graph.nodes(),
+            )
         return np.asarray(nx.adjacency_matrix(self._concept.graph).todense())
 
     def get_shift_information(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -509,7 +600,9 @@ class DataGeneratorGraph:
         concept_info = []
         for concept_drift in self._concept_drifts:
             concept_info += [concept_drift.drift_information]
-        concept = pd.DataFrame(concept_info, columns=['time_stamp(centre)', 'radius', 'shift', 'class'])
+        concept = pd.DataFrame(
+            concept_info, columns=['time_stamp(centre)', 'radius', 'shift', 'class'],
+        )
 
         data_info = []
         for node_idx, entry in self._data_drifts.items():
@@ -518,7 +611,11 @@ class DataGeneratorGraph:
         features = pd.DataFrame(
             data_info,
             columns=[
-                'time_stamp(centre)', 'radius', 'shift of distribution parameters', 'class', 'affected_feature',
+                'time_stamp(centre)',
+                'radius',
+                'shift of distribution parameters',
+                'class',
+                'affected_feature',
             ],
         )
         return concept, features

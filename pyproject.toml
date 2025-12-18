@@ -1,3 +1,6 @@
+[project]
+name = "sid2regenerator"
+
 [tool.poetry]
 name = "SiD2ReGenerator"
 version = "0.3.0"
@@ -48,7 +51,7 @@ Paper = "https://ieeexplore.ieee.org/document/10218255"
 
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"
+python = ">=3.10,<3.12"
 scikit-learn = "^1.2.1"
 pandas = "*"
 matplotlib = "^3.6.3"
@@ -209,7 +212,7 @@ max-line-length = 120
 max-doc-length = 120
 ignore = ["E731", "W503", "WPS412", "WPS410", "I00", "WPS211", "WPS305", "WPS237", "WPS214", "WPS221", "RST", "WPS317",
     "WPS114", "WPS425", "WPS226", "WPS430", "WPS202", "WPS212", "D105", "WPS336", "WPS232", "WPS110", "T201", "S311",
-    "WPS432", "WPS100","WPS519", "WPS204","D100","D104", "WPS421","WPS210", "WPS230","WPS440","WPS231","WPS213","WPS201"]
+    "WPS432", "WPS100","WPS519", "WPS204","D100","D104", "WPS421","WPS210", "WPS230","WPS440","WPS231","WPS213","WPS201","WPS235"]
 doctests = true
 docstring-convention = "numpy"
 count = true
@@ -232,7 +235,7 @@ disable = ["similarities", "too-many-arguments", "imports", "too-many-instance-a
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py{311},lint, type, docstring-examples,notebooks,bandit
+envlist = py{310,311},lint, type, docstring-examples,notebooks,bandit
 
 # Define the minimal tox version required to run;
 # if the host tox is less than this the tool with create an environment and
