@@ -212,7 +212,7 @@ max-line-length = 120
 max-doc-length = 120
 ignore = ["E731", "W503", "WPS412", "WPS410", "I00", "WPS211", "WPS305", "WPS237", "WPS214", "WPS221", "RST", "WPS317",
     "WPS114", "WPS425", "WPS226", "WPS430", "WPS202", "WPS212", "D105", "WPS336", "WPS232", "WPS110", "T201", "S311",
-    "WPS432", "WPS100","WPS519", "WPS204","D100","D104", "WPS421","WPS210", "WPS230","WPS440","WPS231","WPS213","WPS201"]
+    "WPS432", "WPS100","WPS519", "WPS204","D100","D104", "WPS421","WPS210", "WPS230","WPS440","WPS231","WPS213","WPS201","WPS235"]
 doctests = true
 docstring-convention = "numpy"
 count = true

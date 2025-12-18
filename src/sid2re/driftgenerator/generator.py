@@ -92,7 +92,7 @@ def _set_concept_drifts(
     if drift_blocking_mode and concept_drifts != 0:
         step = (time_stamp[-1] - time_stamp[0]) / concept_drifts
         concept_shift_stamps = np.array(
-            [0.5 * step + step * cd_idx for cd_idx in range(concept_drifts)]
+            [0.5 * step + step * cd_idx for cd_idx in range(concept_drifts)],
         )
     else:
         concept_shift_stamps = np.random.rand(concept_drifts) * (
@@ -114,7 +114,7 @@ def _set_concept_drifts(
                                 np.minimum(
                                     max_severity,
                                     np.maximum(
-                                        min_severity, np.random.rand(number_of_models)
+                                        min_severity, np.random.rand(number_of_models),
                                     ),
                                 )
                                 - 0.5
@@ -167,12 +167,12 @@ def _set_concept_drifts(
         else:
             cd_class = info[2]
         drifts += [
-            cd_class( # type: ignore[operator]
+            cd_class(  # type: ignore[operator]
                 drift_time=stamp,
                 drift_radius=info[0],
                 coefficient_shift=info[1],
-            )
-        ]  
+            ),
+        ]
     return drifts
 
 
@@ -192,7 +192,7 @@ def _set_data_drifts(
     if drift_blocking_mode and data_drifts != 0:
         step = (time_stamp[-1] - time_stamp[0]) / data_drifts
         data_shifts = np.array(
-            [0.5 * step + step * dd_idx for dd_idx in range(data_drifts)]
+            [0.5 * step + step * dd_idx for dd_idx in range(data_drifts)],
         )
     else:
         data_shifts = np.random.rand(data_drifts) * (time_stamp[-1] - time_stamp[0])
@@ -211,7 +211,7 @@ def _set_data_drifts(
                     * (time_stamp[-1] - time_stamp[0])
                     / data_drifts,
                     np.minimum(
-                        max_severity, np.maximum(min_severity, np.random.rand(10))
+                        max_severity, np.maximum(min_severity, np.random.rand(10)),
                     ),
                     random.choice(
                         [
@@ -233,7 +233,7 @@ def _set_data_drifts(
                     random.choice(feature_idxs),
                     random.random() * (np.max(data_shifts) / 2),
                     np.minimum(
-                        max_severity, np.maximum(min_severity, np.random.rand(10))
+                        max_severity, np.maximum(min_severity, np.random.rand(10)),
                     ),
                     random.choice(
                         [
@@ -255,11 +255,11 @@ def _set_data_drifts(
         else:
             dd_class = info[3]
         drifts[info[0]] += [
-            dd_class( # type: ignore[operator]
+            dd_class(  # type: ignore[operator]
                 drift_time=stamp,
                 drift_radius=info[1],
                 coefficient_shift=info[2],
-            )
+            ),
         ]
     return drifts
 
@@ -529,7 +529,7 @@ class DataGeneratorGraph:
                 [
                     np.ones((data_df.shape[0], 1)),
                     np.random.normal(
-                        1, self._noise_var, (data_df.shape[0], data_df.shape[1] - 1)
+                        1, self._noise_var, (data_df.shape[0], data_df.shape[1] - 1),
                     ),
                 ],
                 axis=1,
@@ -601,7 +601,7 @@ class DataGeneratorGraph:
         for concept_drift in self._concept_drifts:
             concept_info += [concept_drift.drift_information]
         concept = pd.DataFrame(
-            concept_info, columns=['time_stamp(centre)', 'radius', 'shift', 'class']
+            concept_info, columns=['time_stamp(centre)', 'radius', 'shift', 'class'],
         )
 
         data_info = []
