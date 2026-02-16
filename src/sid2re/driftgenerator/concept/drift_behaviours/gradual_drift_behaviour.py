@@ -67,12 +67,13 @@ class GradualDriftBehaviour(BaseDriftBehaviour):
         NumberArray
             The computed change in coefficients.
         """
-        prob = random.random() * transition_behaviour.transition_coefficient(
+        prob_threshold = transition_behaviour.transition_coefficient(
             current_time,
             self.drift_time,
             self.drift_radius,
         )
-        flag = round(prob)
+        prob = random.random()
+        flag = int(prob < prob_threshold)
         return flag * self.coefficient_shift
 
     @property
